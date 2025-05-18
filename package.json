@@ -10,10 +10,20 @@
   "scripts": {
     "build": "npx hardhat compile",
     "deploy-main": "npx hardhat run scripts/deploy.ts --network subevm",
-    "deploy-testnet": "npx hardhat run scripts/deploy.ts --network testnet",
+    "test-deploy": "npx hardhat run scripts/deploy.ts --network testnet",
     "test": "REPORT_GAS=true npx hardhat test --network hardhat",
     "balance-main": "npx hardhat run scripts/get-balance.ts --network subevm",
-    "balance-testnet": "npx hardhat run scripts/get-balance.ts --network testnet"
+    "test-get-balance": "npx hardhat run scripts/get-balance.ts --network testnet",
+    "test-contract": "npx hardhat run scripts/test-contract.ts --network testnet",
+    "test-contract-main": "npx hardhat run scripts/test-contract.ts --network subevm",
+    "test-contract-unstake": "npx hardhat run scripts/test-contract-unstake.ts --network testnet",
+    "test-contract-alpha": "npx hardhat run scripts/test-contract-alpha.ts --network testnet",
+    "test-stake": "npx hardhat run scripts/test-stake.ts --network testnet",
+    "test-get-stake": "npx hardhat run scripts/test-get-stake.ts --network testnet",
+    "get-stake": "npx hardhat run scripts/test-get-stake.ts --network subevm",
+    "test-get-stake-alpha": "npx hardhat run scripts/test-get-stake-alpha.ts --network testnet",
+    "test-deploy-alpha": "npx hardhat run scripts/deploy-alpha.ts --network testnet",
+    "upgrade-main": "npx hardhat run scripts/upgrade.ts --network subevm"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.7",
@@ -23,6 +33,7 @@
     "@nomicfoundation/hardhat-verify": "^1.0.0",
     "@openzeppelin/contracts": "5.0.1",
     "@openzeppelin/contracts-upgradeable": "^5.1.0",
+    "@openzeppelin/hardhat-upgrades": "^3.9.0",
     "@typechain/ethers-v6": "^0.4.0",
     "@typechain/hardhat": "^8.0.0",
     "@types/chai": "^4.3.19",
@@ -37,5 +48,11 @@
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
     "typescript": "^5.3.3"
+  },
+  "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447",
+  "dependencies": {
+    "@layerzerolabs/lz-evm-protocol-v2": "^3.0.94",
+    "@layerzerolabs/oapp-evm": "^0.3.2",
+    "@layerzerolabs/oft-evm": "^3.1.4"
   }
 }
