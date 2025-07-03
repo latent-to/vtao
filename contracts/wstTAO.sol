@@ -17,7 +17,6 @@ import "./interfaces/IStakingV2.sol";
 
 contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, UUPSUpgradeable, ERC20BurnableUpgradeable {
     // Precompile instances
-    IStaking public staking;
     BLAKE2b private blake2bInstance;
 
     uint16 private constant _netuid = 0;
@@ -34,8 +33,6 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
-
-        staking = IStaking(ISTAKING_ADDRESS);
     }
 
     function initialize(address initialOwner) initializer public {
@@ -166,7 +163,7 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     uint256 currentStake = getCurrentStake(netuid);
     require(currentStake >= amountRaoDecimals, "wstTAO: current stake is lower than expected");
 
-    (bool success, ) = ISTAKING_ADDRESS.call(abi.encodeWithSelector(staking.removeStake.selector, hotkey, amountRaoDecimals, uint256(netuid)));
+    (bool success, ) = ISTAKING_ADDRESS.call(abi.encodeWithSelector(IStaking.removeStake.selector, hotkey, amountRaoDecimals, uint256(netuid)));
     require(success, "wstTAO: failed to unstake");
   }
 
@@ -177,7 +174,7 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     console.log("amountRaoDecimals", amountRaoDecimals);
     console.logBytes32(hotkey);
     //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
-    (bool success, ) = ISTAKING_ADDRESS.call(abi.encodeWithSelector(staking.addStake.selector, hotkey, amountRaoDecimals, netuid));
+    (bool success, ) = ISTAKING_ADDRESS.call(abi.encodeWithSelector(IStaking.addStake.selector, hotkey, amountRaoDecimals, netuid));
     require(success, "wstTAO: failed to stake");
   }
 
@@ -247,7 +244,7 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
 
   function getCurrentStake(uint16 netuid) public view returns (uint256) {
     (bool success, bytes memory resultData) = ISTAKING_ADDRESS.staticcall(
-      abi.encodeWithSelector(staking.getStake.selector, _hotkey, _address_as_pk, netuid)
+      abi.encodeWithSelector(IStaking.getStake.selector, _hotkey, _address_as_pk, netuid)
     );
   
     require(success, "Failed to read getStake");
