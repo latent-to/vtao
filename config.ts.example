@@ -1,0 +1,8 @@
+// PROTECT YOUR PRIVATE KEYS WELL, NEVER COMMIT THEM TO GITHUB OR SHARE WITH ANYONE
+const ethPrivateKey: string = "";
+const ethPrivateKey1: string = "";
+
+export const config = {
+    ethPrivateKey,
+    ethPrivateKey1,
+}
