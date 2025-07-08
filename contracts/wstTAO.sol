@@ -57,10 +57,6 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
             input[i + 4] = address_bytes[i];
         }
         _address_as_pk = blake2bInstance.blake2b_256(input);
-
-        console.log("address(this)");
-        console.logBytes(address_bytes);
-        console.logBytes32(_address_as_pk);
     }
 
     function pause() public onlyOwner {
@@ -88,12 +84,9 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
 
   function _stakeWithAmount(address to, uint256 amountEvm) private {
     require(amountEvm > 0, "wstTAO: can't stake zero TAO");
-    console.log("amountEvm", amountEvm);
-    console.log("address(this).balance", address(this).balance);
 
     // Get the current stake of the contract, this will be in RAO decimals
     uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
-    console.log("currentStakeRaoDecimals", currentStakeRaoDecimals);
 
     // Initial stake balance needs to be 0.1 TAO, and the addStake fee is 50k RAO
     if (currentStakeRaoDecimals == 0) {
@@ -108,14 +101,11 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     _safeStake(_hotkey, amountEvm, _netuid);
     // Get the new stake of the contract
     uint256 newStakeRaoDecimals = getCurrentStake(_netuid);
-    console.log("newStakeRaoDecimals", newStakeRaoDecimals);
     require(newStakeRaoDecimals > currentStakeRaoDecimals, "wstTAO: stake didn't increase");
     // Calculate the amount of TAO staked
     uint256 amountStakedRaoDecimals = newStakeRaoDecimals - currentStakeRaoDecimals;
-    console.log("amountStakedRaoDecimals", amountStakedRaoDecimals);
     // Calculate the amount of wstTAO to mint
     uint256 amountToMintEvmDecimals = TAOtowstTAO_with_current_stake(amountStakedRaoDecimals, currentStakeRaoDecimals);
-    console.log("amountToMintEvmDecimals", amountToMintEvmDecimals);
     require(amountToMintEvmDecimals > 0, "wstTAO: amount to mint is zero");
     // Mint the wstTAO
     _mint(to, amountToMintEvmDecimals);
@@ -133,7 +123,6 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     require(balanceOf(from) >= amountEvm, "wstTAO: can't unstake more wstTAO than user has");
 
     uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
-    console.log("currentStakeRaoDecimals", currentStakeRaoDecimals);
     // Convert the wstTAO to TAO; This is the amount we will unstake
     uint256 amountInTAORaoDecimals = wstTAOtoTAO(amountEvm);
     // Get the balance of the contract before unstaking
@@ -145,7 +134,6 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     require(balanceAfterEvmDecimals > balanceBeforeEvmDecimals, "wstTAO: balance didn't increase");
     
     uint256 newStakeRaoDecimals = getCurrentStake(_netuid);
-    console.log("newStakeRaoDecimals", newStakeRaoDecimals);
     require(currentStakeRaoDecimals - newStakeRaoDecimals <= amountInTAORaoDecimals, "wstTAO: unstaked more than owned");
     // Calculate the actual amount of TAO the contract got from the unstake
     // Note: safe from underflow because of solidity version
@@ -170,9 +158,6 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
   function _safeStake(bytes32 hotkey, uint256 amountEvm, uint16 netuid) private {
     require(amountEvm > 0, "wstTAO: can't stake zero wstTAO");
     uint256 amountRaoDecimals = amountEvm / _decimalConversionFactor;
-
-    console.log("amountRaoDecimals", amountRaoDecimals);
-    console.logBytes32(hotkey);
     //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
     (bool success, ) = ISTAKING_ADDRESS.call(abi.encodeWithSelector(IStaking.addStake.selector, hotkey, amountRaoDecimals, netuid));
     require(success, "wstTAO: failed to stake");
