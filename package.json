@@ -11,11 +11,12 @@
     "build": "npx hardhat compile",
     "deploy-main": "npx hardhat run scripts/deploy.ts --network subevm",
     "test-deploy": "npx hardhat run scripts/deploy.ts --network testnet",
-    "test": "REPORT_GAS=true npx hardhat test --network hardhat",
+    "test": "npx hardhat test --network testnet",
     "balance-main": "npx hardhat run scripts/get-balance.ts --network subevm",
     "test-get-balance": "npx hardhat run scripts/get-balance.ts --network testnet",
     "test-contract": "npx hardhat run scripts/test-contract.ts --network testnet",
     "test-contract-main": "npx hardhat run scripts/test-contract.ts --network subevm",
+    "contract-transfer-to-stake": "npx hardhat run scripts/test-contract-transfer-to-stake.ts --network subevm",
     "test-contract-unstake": "npx hardhat run scripts/test-contract-unstake.ts --network testnet",
     "test-contract-alpha": "npx hardhat run scripts/test-contract-alpha.ts --network testnet",
     "test-stake": "npx hardhat run scripts/test-stake.ts --network testnet",
@@ -26,6 +27,7 @@
     "upgrade-main": "npx hardhat run scripts/upgrade.ts --network subevm"
   },
   "devDependencies": {
+    "@layerzerolabs/lz-evm-messagelib-v2": "^3.0.110",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.7",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.11",
@@ -44,6 +46,7 @@
     "fs": "^0.0.1-security",
     "hardhat": "^2.19.4",
     "hardhat-gas-reporter": "^1.0.8",
+    "solidity-bytes-utils": "^0.8.4",
     "solidity-coverage": "^0.8.13",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
@@ -52,7 +55,9 @@
   "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447",
   "dependencies": {
     "@layerzerolabs/lz-evm-protocol-v2": "^3.0.94",
+    "@layerzerolabs/lz-v2-utilities": "^3.0.98",
     "@layerzerolabs/oapp-evm": "^0.3.2",
-    "@layerzerolabs/oft-evm": "^3.1.4"
+    "@layerzerolabs/oft-evm": "^3.1.4",
+    "base58-solidity": "^1.0.2"
   }
 }
