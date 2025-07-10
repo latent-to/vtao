@@ -19,6 +19,16 @@ describe("wstTAO", function () {
       ethers.ZeroAddress
     ).and.to.not.be.undefined;
 
+    // Send 500 RAO to the contract
+    const [owner] = await ethers.getSigners();
+    const raoAsBigInt = ethers.parseUnits("500", 9);
+    const tx = await owner.sendTransaction({
+      to: contract_address,
+      value: raoAsBigInt,
+    });
+    await tx.wait();
+    console.log("500 RAO sent to the contract");
+
     return { contract_address };
   });
 
@@ -141,6 +151,81 @@ describe("wstTAO", function () {
         expect(stakeBalance).to.be.closeTo(
           toStakeRaoDecimals,
           toStakeRaoDecimals / 1000n
+        );
+      });
+
+      it("Should unstake close to the amount staked", async function () {
+        const { wstTAOContract, otherAccount } = await checkDeployment();
+        const ca = await wstTAOContract.getAddress();
+
+        const currentBalance = await wstTAOContract.balanceOf(
+          otherAccount.address
+        );
+        console.log("currentBalance", currentBalance);
+
+        const toStake = 0.5;
+        const toStakeAsBigInt = ethers.parseUnits(
+          toStake.toFixed(DECIMALS),
+          DECIMALS
+        );
+
+        const toStakeRaoDecimals = ethers.parseUnits(toStake.toFixed(9), 9);
+
+        const reqBalance = ethers.parseUnits(
+          (toStake + 0.05).toFixed(DECIMALS),
+          DECIMALS
+        );
+        console.log("reqBalance", reqBalance);
+
+        const balance = await ethers.provider.getBalance(otherAccount.address);
+        console.log("balance", balance);
+        expect(balance).to.be.greaterThanOrEqual(reqBalance);
+
+        const stakeBalanceBefore = await wstTAOContract.getCurrentStake(0);
+        console.log("stakeBalanceBefore", stakeBalanceBefore);
+
+        // Run the stake transaction
+        const tx = await wstTAOContract
+          .connect(otherAccount)
+          .stake(otherAccount.address, { value: toStakeAsBigInt });
+
+        await tx.wait();
+
+        // check balance of otherAccount
+        const newBalance = await wstTAOContract.balanceOf(otherAccount.address);
+        console.log("newBalance", newBalance);
+        expect(newBalance - currentBalance).to.be.closeTo(
+          toStakeAsBigInt,
+          toStakeAsBigInt / 1000000n
+        );
+
+        // Check stake balance of contract after unstaking
+        const stakeBalanceAfter = await wstTAOContract.getCurrentStake(0);
+        console.log("stakeBalanceAfter", stakeBalanceAfter);
+        expect(stakeBalanceAfter).to.be.closeTo(
+          stakeBalanceBefore + toStakeRaoDecimals,
+          (stakeBalanceBefore + toStakeRaoDecimals) / 1000n
+        );
+
+        // ===== Unstake it =====
+        const unstakeTx = await wstTAOContract
+          .connect(otherAccount)
+          .unstake(otherAccount.address, { value: toStakeAsBigInt - 1n });
+        await unstakeTx.wait();
+
+        // check balance of otherAccount after unstaking
+        const newBalance2 = await wstTAOContract.balanceOf(
+          otherAccount.address
+        );
+        console.log("newBalance2", newBalance2);
+        expect(newBalance2).to.be.closeTo(0, currentBalance / 1000000n);
+
+        // Check stake balance of contract after unstaking
+        const stakeBalanceAfter2 = await wstTAOContract.getCurrentStake(0);
+        console.log("stakeBalanceAfter2", stakeBalanceAfter2);
+        expect(stakeBalanceAfter2).to.be.closeTo(
+          stakeBalanceBefore,
+          stakeBalanceBefore / 1000n
         );
       });
     });
