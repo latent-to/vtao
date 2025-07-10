@@ -28,6 +28,9 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     string public constant NAME = "Wrapped Staked TAO";
     string public constant SYMBOL = "wstTAO";
     uint public constant INITIAL_SUPPLY = 0;
+
+    uint256 public constant MIN_STAKE_AMOUNT = 0.0005 ether;
+    uint256 public constant MIN_STAKE_BALANCE = 0.1 ether;
     
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -82,13 +85,22 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
         super._update(from, to, value);
     }
 
-  function stake(address to) public payable {
-    require(msg.value > 0, "wstTAO: can't stake zero TAO");
-
-    uint256 amountEvm = msg.value; // This is the amount in EVM decimals
+  function _stakeWithAmount(address to, uint256 amountEvm) private {
+    require(amountEvm > 0, "wstTAO: can't stake zero TAO");
+    require(amountEvm >= MIN_STAKE_AMOUNT, "wstTAO: can't stake less than the min amount.");
 
     // Get the current stake of the contract, this will be in RAO decimals
     uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
+
+    // Initial stake balance needs to be 0.1 TAO, and the addStake fee is 50k RAO
+    if (currentStakeRaoDecimals == 0) {
+      // 0.1 TAO min balance, plus 50k RAO addStake fee
+      require(amountEvm >= 0.100_05 ether, "stake lt minStake + addStake fee");
+    } else {
+      // 500k RAO min stake amount, plus 50k RAO addStake fee
+      require(amountEvm >= 0.000_55 ether, "stake lt minAmt + addStake fee");
+    }
+
     // Stake the TAO
     _safeStake(_hotkey, amountEvm, _netuid);
     // Get the new stake of the contract
@@ -104,9 +116,9 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
   }
 
   function unstake(uint256 amountEvm) public {
-    if (amountEvm == 0) {
-      require(amountEvm > 0, "wstTAO: can't unstake zero wstTAO");
-    }
+    require(amountEvm > 0, "wstTAO: can't unstake zero wstTAO");
+    require(amountEvm > MIN_STAKE_AMOUNT, "wstTAO: can't unstake less than the min amount.");
+  
     require(getCurrentStake(_netuid) > 0, "wstTAO: can't unstake wstTAO if the contract has no stake");
 
     address from = msg.sender;
@@ -151,6 +163,22 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
     (bool success, ) = ISTAKING_ADDRESS.call(abi.encodeWithSelector(IStaking.addStake.selector, hotkey, amountRaoDecimals, netuid));
     require(success, "wstTAO: failed to stake");
+  }
+
+  function stake(address to) public payable {
+    uint256 amountEvm = msg.value; // This is the amount in EVM decimals
+
+    uint256 currentBalance = address(this).balance;
+
+    // Allow sending the min balance to the contract without staking
+    if (currentBalance == 0 && amountEvm == 0) {
+      return; // Exit here, donated 500 RAO to the contract
+    } // We can't detect if this is the first deposit 
+    // 500 RAO is negligible, so we ignore it otherwise.
+
+    require(currentBalance + amountEvm >= MIN_STAKE_BALANCE, "wstTAO: can't have a stake balance less than the min balance.");
+    
+    _stakeWithAmount(to, amountEvm);
   }
   
   /**
