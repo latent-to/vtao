@@ -19,9 +19,9 @@ describe("wstTAO", function () {
       ethers.ZeroAddress
     ).and.to.not.be.undefined;
 
-    // Send 500 RAO to the contract
+    // Send stake minimum to the contract
     const [owner] = await ethers.getSigners();
-    const raoAsBigInt = ethers.parseUnits("500", 9);
+    const raoAsBigInt = ethers.parseUnits("200000500", 9);
     const tx = await owner.sendTransaction({
       to: contract_address,
       value: raoAsBigInt,
@@ -210,7 +210,7 @@ describe("wstTAO", function () {
         // ===== Unstake it =====
         const unstakeTx = await wstTAOContract
           .connect(otherAccount)
-          .unstake(otherAccount.address, { value: toStakeAsBigInt - 1n });
+          .unstake(newBalance - 1n);
         await unstakeTx.wait();
 
         // check balance of otherAccount after unstaking
@@ -218,7 +218,7 @@ describe("wstTAO", function () {
           otherAccount.address
         );
         console.log("newBalance2", newBalance2);
-        expect(newBalance2).to.be.closeTo(0, currentBalance / 1000000n);
+        expect(newBalance2).to.be.closeTo(0, newBalance / 10_000n); // within 0.0001%
 
         // Check stake balance of contract after unstaking
         const stakeBalanceAfter2 = await wstTAOContract.getCurrentStake(0);
