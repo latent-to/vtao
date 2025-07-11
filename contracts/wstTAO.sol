@@ -10,6 +10,8 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import "@openzeppelin/contracts/utils/math/Math.sol";
+
 import "./BLAKE2b.sol";
 import "./interfaces/IStakingV2.sol";
 
@@ -144,9 +146,10 @@ contract WrappedStakedTAO is
             "wstTAO: can't unstake more wstTAO than user has"
         );
 
-        uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
         // Convert the wstTAO to TAO; This is the amount we will unstake
         uint256 amountInTAORaoDecimals = wstTAOtoTAO(amountEvm);
+        uint256 amountInTAOEvmDecimals = _decimalConversionFactor *
+            amountInTAORaoDecimals;
         // Get the balance of the contract before unstaking
         uint256 balanceBeforeEvmDecimals = address(this).balance;
         // Unstake the wstTAO amount
@@ -158,22 +161,21 @@ contract WrappedStakedTAO is
             "wstTAO: balance didn't increase"
         );
 
-        uint256 newStakeRaoDecimals = getCurrentStake(_netuid);
-        // Can happen if the contract get's unstaked; the alternative is to unstake amountInTAORaoDecimals TAO
-        require(
-            currentStakeRaoDecimals - newStakeRaoDecimals <=
-                amountInTAORaoDecimals,
-            "wstTAO: unstaked more than owned"
-        );
         // Calculate the actual amount of TAO the contract got from the unstake
         // Note: safe from underflow because of solidity version
         uint256 actualAmountInTAOEvmDecimals = balanceAfterEvmDecimals -
             balanceBeforeEvmDecimals;
 
+        // Only allow unstake up to the amount of TAO the balance should've corresponded to
+        uint256 amountToSend = Math.min(
+            amountInTAOEvmDecimals,
+            actualAmountInTAOEvmDecimals
+        );
+
         // Burn the wstTAO
         _burn(from, amountEvm);
         // Transfer the actual amount of TAO from our contract
-        _safeTransferTAO(from, actualAmountInTAOEvmDecimals);
+        _safeTransferTAO(from, amountToSend);
     }
 
     function _safeUnstake(
@@ -224,13 +226,17 @@ contract WrappedStakedTAO is
 
         uint256 currentBalance = address(this).balance;
 
-        // Otherwise, require the balance to be at least the min balance
-        require(
-            currentBalance + amountEvm >= MIN_STAKE_BALANCE,
-            "wstTAO: can't have a stake balance less than the min balance."
-        );
+        if (amountEvm == 0.000_000_500 ether && currentBalance == 0 ether) {
+            return; // Allow donating 500 RAO to the contract
+        } else {
+            // Otherwise, require the balance to be at least the min balance
+            require(
+                currentBalance + amountEvm >= MIN_STAKE_BALANCE,
+                "wstTAO: can't have a stake balance less than the min balance."
+            );
 
-        _stakeWithAmount(to, amountEvm);
+            _stakeWithAmount(to, amountEvm);
+        }
     }
 
     /**

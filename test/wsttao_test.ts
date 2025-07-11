@@ -21,7 +21,7 @@ describe("wstTAO", function () {
 
     // Send stake minimum to the contract
     const [owner] = await ethers.getSigners();
-    const raoAsBigInt = ethers.parseUnits("200000500", 9);
+    const raoAsBigInt = ethers.parseUnits("500", 9);
     const tx = await owner.sendTransaction({
       to: contract_address,
       value: raoAsBigInt,
