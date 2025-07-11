@@ -37,8 +37,9 @@ contract WrappedStakedTAO is
     string public constant SYMBOL = "wstTAO";
     uint public constant INITIAL_SUPPLY = 0;
 
-    uint256 public constant MIN_STAKE_AMOUNT = 0.0002 ether;
-    uint256 public constant MIN_STAKE_BALANCE = 0.2 ether;
+    uint256 public constant MIN_STAKE_AMOUNT = 0.0002 ether; // 0.0002 TAO
+    // Must be in RAO decimals
+    uint256 public constant MIN_STAKE_BALANCE = 200_000_000; // 0.2 TAO
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -229,10 +230,13 @@ contract WrappedStakedTAO is
         if (amountEvm == 0.000_000_500 ether && currentBalance == 0 ether) {
             return; // Allow donating 500 RAO to the contract
         } else {
-            // Otherwise, require the balance to be at least the min balance
+            uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
+            // Otherwise, require the stake balance to be at least the min balance
             require(
-                currentBalance + amountEvm >= MIN_STAKE_BALANCE,
-                "wstTAO: can't have a stake balance less than the min balance."
+                currentStakeRaoDecimals +
+                    (amountEvm / _decimalConversionFactor) >=
+                    MIN_STAKE_BALANCE,
+                "wstTAO: can't have a stake balance less than the min stake balance."
             );
 
             _stakeWithAmount(to, amountEvm);

@@ -435,5 +435,64 @@ describe("wstTAO", function () {
         );
       });
     });
+
+    describe("Unhappy paths", function () {
+      it("Should not allow a stake of 0", async function () {
+        const { wstTAOContract, otherAccount } = await checkDeployment();
+        // Stake the inital minimum balance
+        const toStakeInitial = 0.25;
+        const toStakeInitialAsBigInt = ethers.parseUnits(
+          toStakeInitial.toFixed(DECIMALS),
+          DECIMALS
+        );
+
+        const tx1 = await wstTAOContract.stake(otherAccount.address, {
+          value: toStakeInitialAsBigInt,
+        });
+        await tx1.wait();
+
+        // Try to stake 0
+        const toStake = 0.0;
+        const toStakeAsBigInt = ethers.parseUnits(
+          toStake.toFixed(DECIMALS),
+          DECIMALS
+        );
+
+        const tx = wstTAOContract.stake(otherAccount.address, {
+          value: toStakeAsBigInt,
+        });
+        await expect(tx).to.be.revertedWith("can't stake zero");
+      });
+
+      it("Should not allow a stake of below the minimum stake", async function () {
+        const { wstTAOContract, otherAccount } = await checkDeployment();
+        // Stake the inital minimum balance
+        const toStakeInitial = 0.25;
+        const toStakeInitialAsBigInt = ethers.parseUnits(
+          toStakeInitial.toFixed(DECIMALS),
+          DECIMALS
+        );
+
+        const tx1 = await wstTAOContract.stake(otherAccount.address, {
+          value: toStakeInitialAsBigInt,
+        });
+        await tx1.wait();
+
+        // Try to stake below the minimum stake amount
+
+        const toStake = 0.0001; // Less than 0.0002 minimum stake amount
+        const toStakeAsBigInt = ethers.parseUnits(
+          toStake.toFixed(DECIMALS),
+          DECIMALS
+        );
+
+        const tx = wstTAOContract.stake(otherAccount.address, {
+          value: toStakeAsBigInt,
+        });
+        await expect(tx).to.be.revertedWith(
+          "can't stake less than the min amount"
+        );
+      });
+    });
   });
 });
