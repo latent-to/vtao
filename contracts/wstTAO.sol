@@ -131,6 +131,7 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     require(balanceAfterEvmDecimals > balanceBeforeEvmDecimals, "wstTAO: balance didn't increase");
     
     uint256 newStakeRaoDecimals = getCurrentStake(_netuid);
+    // Can happen if the contract get's unstaked; the alternative is to unstake amountInTAORaoDecimals TAO
     require(currentStakeRaoDecimals - newStakeRaoDecimals <= amountInTAORaoDecimals, "wstTAO: unstaked more than owned");
     // Calculate the actual amount of TAO the contract got from the unstake
     // Note: safe from underflow because of solidity version
@@ -165,14 +166,9 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
 
     uint256 currentBalance = address(this).balance;
 
-    // Allow sending the min balance to the contract without staking
-    if (currentBalance == 0 && amountEvm == 0) {
-      return; // Exit here, donated 500 RAO to the contract
-    } // We can't detect if this is the first deposit 
-    // 500 RAO is negligible, so we ignore it otherwise.
-
+    // Otherwise, require the balance to be at least the min balance
     require(currentBalance + amountEvm >= MIN_STAKE_BALANCE, "wstTAO: can't have a stake balance less than the min balance.");
-    
+
     _stakeWithAmount(to, amountEvm);
   }
   
