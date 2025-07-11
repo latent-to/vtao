@@ -90,13 +90,10 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     // Get the current stake of the contract, this will be in RAO decimals
     uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
 
-    // Initial stake balance needs to be 0.1 TAO, and the addStake fee is 50k RAO
+    // Initial stake balance needs to be 0.1 TAO, no addStake fee
     if (currentStakeRaoDecimals == 0) {
-      // 0.1 TAO min balance, plus 50k RAO addStake fee
-      require(amountEvm >= 0.100_05 ether, "stake lt minStake + addStake fee");
-    } else {
-      // 500k RAO min stake amount, plus 50k RAO addStake fee
-      require(amountEvm >= 0.000_55 ether, "stake lt minAmt + addStake fee");
+      // 0.1 TAO min balance
+      require(amountEvm >= MIN_STAKE_BALANCE, "stake lt minStake");
     }
 
     // Stake the TAO
