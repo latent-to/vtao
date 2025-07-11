@@ -10,8 +10,7 @@
   "scripts": {
     "build": "npx hardhat compile",
     "deploy-main": "npx hardhat run scripts/deploy.ts --network subevm",
-    "test-deploy": "npx hardhat run scripts/deploy.ts --network testnet",
-    "test": "npx hardhat test --network testnet",
+    "test-localnet": "npx hardhat test --network localnet",
     "balance-main": "npx hardhat run scripts/get-balance.ts --network subevm",
     "test-get-balance": "npx hardhat run scripts/get-balance.ts --network testnet",
     "test-contract": "npx hardhat run scripts/test-contract.ts --network testnet",

@@ -24,6 +24,10 @@ const hardhatConfig: HardhatUserConfig = {
     subevm: {
       url: "https://lite.chain.opentensor.ai",
       accounts: [config.ethPrivateKey]
+    },
+    localnet: {
+      url: "http://127.0.0.1:9945",
+      accounts: [config.ethPrivateKey, config.ethPrivateKey1]
     }
   },
   mocha: {
