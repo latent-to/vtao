@@ -461,7 +461,7 @@ describe("wstTAO", function () {
         const tx = wstTAOContract.stake(otherAccount.address, {
           value: toStakeAsBigInt,
         });
-        await expect(tx).to.be.revertedWith("can't stake zero");
+        await expect(tx).to.be.revertedWith(/can't stake zero/);
       });
 
       it("Should not allow a stake of below the minimum stake", async function () {
@@ -489,9 +489,7 @@ describe("wstTAO", function () {
         const tx = wstTAOContract.stake(otherAccount.address, {
           value: toStakeAsBigInt,
         });
-        await expect(tx).to.be.revertedWith(
-          "can't stake less than the min amount"
-        );
+        await expect(tx).to.be.revertedWith(/can't stake less than the min amount/);
       });
     });
   });
