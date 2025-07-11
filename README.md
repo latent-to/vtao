@@ -16,3 +16,31 @@ Deploy a contract to testnet and run tests on it:
 yarn install
 yarn run test
 ```
+
+### Note about Localnet
+
+If you're testing on a localnet, which you can run with the opentensor/subtensor repo via `./scripts/localnet.sh`, you'll want to disable the evm whitelist.
+Using polkadot-js/apps connected to your localnet (default: `http://127.0.0.1:9945`), navigate to the "Developer" -> "Extrinsics" tab and submit the following extrinsic as `Alice`:
+
+```
+sudo.sudo(
+    evm.disableWhitelist(
+        Yes
+    )
+)
+```
+
+This will allow you to deploy your contract to localnet as any account with balance.
+
+You may also fund your balances by editing the `node/src/chain_spec/localnet.rs` file and adding your EVM ss58 equivalents to the `balances` vector: 
+
+```rust
+let mut balances = vec![
+    // ...
+    (
+        AccountId::from_ss58_string("5H...").unwrap(),
+        123_456_789u128 // funds
+    ),
+];
+```
+and then run the localnet script again to recompile.
