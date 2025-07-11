@@ -27,8 +27,8 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     string public constant SYMBOL = "wstTAO";
     uint public constant INITIAL_SUPPLY = 0;
 
-    uint256 public constant MIN_STAKE_AMOUNT = 0.0005 ether;
-    uint256 public constant MIN_STAKE_BALANCE = 0.1 ether;
+    uint256 public constant MIN_STAKE_AMOUNT = 0.0002 ether; 
+    uint256 public constant MIN_STAKE_BALANCE = 0.2 ether;
     
 
     /// @custom:oz-upgrades-unsafe-allow constructor
