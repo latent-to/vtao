@@ -603,6 +603,126 @@ describe("wstTAO", function () {
           /can't unstake more .+? than user has/
         );
       });
+
+      it("Should not give a user more TAO than they have staked, even if the contract goes under min stake", async function () {
+        const { wstTAOContract, otherAccount, owner } = await checkDeployment();
+        const ca = await wstTAOContract.getAddress();
+
+        // Check stake of contract at start of test
+        const contract_stakeBefore = await wstTAOContract.getCurrentStake(0);
+        console.log("contract stake:", contract_stakeBefore);
+
+        // Check contract balance at start of test
+        const contract_balanceBefore = await ethers.provider.getBalance(ca);
+        console.log("contract free balance:", contract_balanceBefore);
+
+        // Check user balance at start of test
+        const user_balanceBefore = await wstTAOContract.balanceOf(
+          otherAccount.address
+        );
+        console.log("user CA-balance:", user_balanceBefore);
+
+        const user_freeBefore = await ethers.provider.getBalance(
+          otherAccount.address
+        );
+        console.log("user free balance:", user_freeBefore);
+
+        // Check owner balance at start of test
+        const owner_freeBefore = await ethers.provider.getBalance(
+          owner.address
+        );
+        console.log("owner free balance:", owner_freeBefore);
+
+        // Check owner balance at start of test
+        const owner_balanceBefore = await wstTAOContract.balanceOf(
+          owner.address
+        ); // 0
+        console.log("owner CA-balance:", owner_balanceBefore);
+
+        // Stake some TAO as owner
+        const toStake = 0.5;
+        const toStakeAsBigInt = ethers.parseUnits(
+          toStake.toFixed(DECIMALS),
+          DECIMALS
+        );
+
+        const tx0 = await wstTAOContract.connect(owner).stake(owner.address, {
+          value: toStakeAsBigInt,
+        });
+        await tx0.wait();
+
+        // Check owner balance after staking
+        const owner_balanceAfter = await wstTAOContract.balanceOf(
+          owner.address
+        );
+        console.log("owner CA-balance:", owner_balanceAfter);
+
+        // Check owner balance after staking
+        const owner_freeAfter = await ethers.provider.getBalance(owner.address);
+        console.log("owner free balance:", owner_freeAfter);
+
+        // Check contract stake after staking
+        const contract_stakeAfter = await wstTAOContract.getCurrentStake(0);
+        console.log("contract stake:", contract_stakeAfter);
+
+        // Check contract balance after staking
+        const contract_balanceAfter = await ethers.provider.getBalance(ca);
+        console.log("contract free balance:", contract_balanceAfter);
+
+        // Stake as the user
+        const tx1 = await wstTAOContract
+          .connect(otherAccount)
+          .stake(otherAccount.address, {
+            value: toStakeAsBigInt,
+          });
+        await tx1.wait();
+
+        // Check user balance after staking
+        const user_balanceAfter = await wstTAOContract.balanceOf(
+          otherAccount.address
+        );
+        console.log("user CA-balance:", user_balanceAfter);
+
+        // Check user balance after staking
+        const user_freeAfter = await ethers.provider.getBalance(
+          otherAccount.address
+        );
+        console.log("user free balance:", user_freeAfter);
+
+        // Check contract stake after staking
+        const contract_stakeAfter2 = await wstTAOContract.getCurrentStake(0);
+        console.log("contract stake:", contract_stakeAfter2);
+
+        // Check contract balance after staking
+        const contract_balanceAfter2 = await ethers.provider.getBalance(ca);
+        console.log("contract free balance:", contract_balanceAfter2);
+
+        // Unstake as the owner, leave just under min stake
+        const minStakeBalance = 20_000_000n; // 0.02 TAO
+        const toUnstakeOwner = owner_balanceAfter - minStakeBalance;
+        const tx3 = await wstTAOContract.connect(owner).unstake(toUnstakeOwner);
+        await tx3.wait();
+
+        // Check owner balance after unstaking
+        const owner_balanceAfter3 = await wstTAOContract.balanceOf(
+          owner.address
+        );
+        console.log("owner CA-balance:", owner_balanceAfter3);
+
+        // Check contract stake after unstaking
+        const contract_stakeAfter3 = await wstTAOContract.getCurrentStake(0);
+        console.log("contract stake:", contract_stakeAfter3);
+        expect(contract_stakeAfter3).to.not.be.closeTo(0, 1000n);
+
+        // Unstake as the user. This should unstake all of the user's balance
+        // and leave the contract under the min_stake_balance
+        const toUnstake = user_balanceAfter;
+        const tx2 = wstTAOContract
+          .connect(otherAccount)
+          .unstake(toUnstake - 1n);
+
+        await expect(tx2).to.be.revertedWith(/unstake got more than expected/);
+      });
     });
   });
 });
