@@ -557,6 +557,52 @@ describe("wstTAO", function () {
           /can't stake less than the min amount/
         );
       });
+
+      it("Should not allow a user to unstake more than their balance", async function () {
+        const { wstTAOContract, otherAccount } = await checkDeployment();
+        const ca = await wstTAOContract.getAddress();
+
+        // Check stake of contract at start of test
+        const contract_stakeBefore = await wstTAOContract.getCurrentStake(0);
+        console.log("contract stake:", contract_stakeBefore);
+
+        // Check user balance at start of test
+        const user_balanceBefore = await wstTAOContract.balanceOf(
+          otherAccount.address
+        );
+        console.log("user CA-balance:", user_balanceBefore);
+
+        // Check contract balance at start of test
+        const contract_balanceBefore = await ethers.provider.getBalance(ca);
+        console.log("contract free balance:", contract_balanceBefore);
+
+        // Stake some TAO
+        const toStake = 0.5;
+        const toStakeAsBigInt = ethers.parseUnits(
+          toStake.toFixed(DECIMALS),
+          DECIMALS
+        );
+
+        const tx0 = await wstTAOContract
+          .connect(otherAccount)
+          .stake(otherAccount.address, {
+            value: toStakeAsBigInt,
+          });
+        await tx0.wait();
+
+        // Get the user's balance after staking
+        const user_balanceAfter = await wstTAOContract.balanceOf(
+          otherAccount.address
+        );
+        console.log("user CA-balance:", user_balanceAfter);
+
+        // Try to unstake more than the user's balance
+        const toUnstake = user_balanceAfter;
+        const tx = wstTAOContract.connect(otherAccount).unstake(toUnstake + 1n);
+        await expect(tx).to.be.revertedWith(
+          /can't unstake more .+? than user has/
+        );
+      });
     });
   });
 });
