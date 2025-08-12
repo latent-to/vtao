@@ -9,6 +9,7 @@ import {ERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -22,7 +23,8 @@ contract WrappedStakedTAO is
     OwnableUpgradeable,
     ERC20PermitUpgradeable,
     UUPSUpgradeable,
-    ERC20BurnableUpgradeable
+    ERC20BurnableUpgradeable,
+    ReentrancyGuardUpgradeable
 {
     // Precompile instances
     BLAKE2b private blake2bInstance;
@@ -53,6 +55,7 @@ contract WrappedStakedTAO is
         __Ownable_init(initialOwner);
         __ERC20Permit_init(NAME);
         __UUPSUpgradeable_init();
+        __ReentrancyGuard_init();
 
         _hotkey = 0x20b0f8ac1d5416d32f5a552f98b570f06e8392ccb803029e04f63fbe0553c954;
         _decimalConversionFactor = 10 ** 9;
@@ -129,7 +132,7 @@ contract WrappedStakedTAO is
         _mint(to, amountToMintEvmDecimals);
     }
 
-    function unstake(uint256 amountEvm) public {
+    function unstake(uint256 amountEvm) public nonReentrant {
         require(amountEvm > 0, "wstTAO: can't unstake zero wstTAO");
         require(
             amountEvm > MIN_STAKE_AMOUNT,
@@ -227,7 +230,7 @@ contract WrappedStakedTAO is
         require(success, "wstTAO: failed to stake");
     }
 
-    function stake(address to) public payable {
+    function stake(address to) public payable nonReentrant {
         uint256 amountEvm = msg.value; // This is the amount in EVM decimals
 
         uint256 currentBalance = address(this).balance;
