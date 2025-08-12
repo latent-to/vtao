@@ -167,6 +167,11 @@ contract WrappedStakedTAO is
         uint256 actualAmountInTAOEvmDecimals = balanceAfterEvmDecimals -
             balanceBeforeEvmDecimals;
 
+        require(
+            actualAmountInTAOEvmDecimals <= amountInTAOEvmDecimals,
+            "wstTAO: unstake got more than expected"
+        );
+
         // Only allow unstake up to the amount of TAO the balance should've corresponded to
         uint256 amountToSend = Math.min(
             amountInTAOEvmDecimals,
