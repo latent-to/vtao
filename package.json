@@ -11,7 +11,7 @@
     "build": "npx hardhat compile",
     "deploy-main": "npx hardhat run scripts/deploy.ts --network subevm",
     "test-deploy": "npx hardhat run scripts/deploy.ts --network localnet",
-    "test": "npx hardhat test --network localnet",
+    "test": "npx hardhat test --network testnet",
     "test-localnet": "npx hardhat test --network localnet",
     "balance-main": "npx hardhat run scripts/get-balance.ts --network subevm",
     "test-get-balance": "npx hardhat run scripts/get-balance.ts --network localnet",
