@@ -1,4 +1,4 @@
-# wstTAO
+# vTAO
 A wrapped-staked ERC-20 compatible version of TAO.
 
 ## Running tests

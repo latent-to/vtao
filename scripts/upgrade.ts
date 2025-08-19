@@ -11,7 +11,7 @@ async function main() {
     return;
   }
   const { address, abi } = JSON.parse(deployedInfo);
-  console.log(`wstTAO address: ${address}`);
+  console.log(`vTAO address: ${address}`);
 
   const [owner, otherAccount, thirdAccount] = await ethers.getSigners();
 
@@ -19,19 +19,19 @@ async function main() {
   const contract = new ethers.Contract(address, abi, owner);
 
 
-  const wstTAO = await ethers.getContractFactory("WrappedStakedTAO"); // Has access to private fields
+  const vTAO = await ethers.getContractFactory("VirtualTAO"); // Has access to private fields
   
-  const wstTAOContract = await upgrades.upgradeProxy(contract, wstTAO);
-  await wstTAOContract.waitForDeployment();
+  const vTAOContract = await upgrades.upgradeProxy(contract, vTAO);
+  await vTAOContract.waitForDeployment();
 
   console.log(
-    `wstTAO deployed to ${wstTAOContract.target}`
+    `vTAO deployed to ${vTAOContract.target}`
   );
 
   // Save deployment address and ABI
   const deployedContract = {
-    address: wstTAOContract.target,
-    abi: JSON.parse(wstTAOContract.interface.formatJson())
+    address: vTAOContract.target,
+    abi: JSON.parse(vTAOContract.interface.formatJson())
   };
   fs.writeFileSync("./deployed-contract.json", JSON.stringify(deployedContract));
 }

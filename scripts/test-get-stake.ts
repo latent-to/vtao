@@ -22,7 +22,7 @@ async function main() {
 
   // Connect to the deployed ERC-20 contract
   const contract = new ethers.Contract(address, abi, signer);
-  const wstTAOContract = new ethers.Contract(c_address, c_abi, signer);
+  const vTAOContract = new ethers.Contract(c_address, c_abi, signer);
 
   const hotkey = "0x20b0f8ac1d5416d32f5a552f98b570f06e8392ccb803029e04f63fbe0553c954";
   const coldkey = "0xc3027b33125d032eb377cdbe408d35a8466d8510936824b40b7bf56bee26ba05"; // c_address
@@ -31,14 +31,14 @@ async function main() {
   const curr_stake = await contract.getStake(hotkey, coldkey, netuid);
   console.log("curr_stake", curr_stake);
 
-  const wstTAO_stake = await wstTAOContract.getCurrentStake(netuid);
-  console.log("wstTAO_stake", wstTAO_stake);
+  const vTAO_stake = await vTAOContract.getCurrentStake(netuid);
+  console.log("vTAO_stake", vTAO_stake);
 
-  const pk = await wstTAOContract.getAddressAsPk();
+  const pk = await vTAOContract.getAddressAsPk();
   console.log("pk", pk);
 
-  const wstTAO_stake_pk = await wstTAOContract.TAOtowstTAO(100_000_000);
-  console.log("wstTAO_stake_pk", wstTAO_stake_pk);
+  const vTAO_stake_pk = await vTAOContract.TAOtovTAO(100_000_000);
+  console.log("vTAO_stake_pk", vTAO_stake_pk);
 }
 
 main().catch((error) => {

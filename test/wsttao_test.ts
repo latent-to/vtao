@@ -5,15 +5,15 @@ import { ethers, upgrades } from "hardhat";
 const DECIMALS = 18;
 let contract_address: string | null = null;
 
-describe("wstTAO", function () {
+describe("vTAO", function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
 
   before(async function () {
     console.log("before");
-    const { wstTAOContract } = await deployToken();
-    contract_address = await wstTAOContract.getAddress();
+    const { vTAOContract } = await deployToken();
+    contract_address = await vTAOContract.getAddress();
     console.log("contract_address", contract_address);
     expect(contract_address).to.not.equal(
       ethers.ZeroAddress
@@ -33,18 +33,18 @@ describe("wstTAO", function () {
   });
 
   async function deployToken() {
-    const wstTAO = await ethers.getContractFactory("WrappedStakedTAO"); // Has access to private fields
+    const vTAO = await ethers.getContractFactory("VirtualTAO"); // Has access to private fields
     const [owner, otherAccount] = await ethers.getSigners();
     console.log("owner", owner.address);
     console.log("otherAccount", otherAccount.address);
-    console.log("deploying wstTAO");
-    const wstTAOContract = await upgrades.deployProxy(wstTAO, [owner.address], {
+    console.log("deploying vTAO");
+    const vTAOContract = await upgrades.deployProxy(vTAO, [owner.address], {
       initializer: "initialize",
     });
-    await wstTAOContract.waitForDeployment();
-    console.log("wstTAOContract deployed");
+    await vTAOContract.waitForDeployment();
+    console.log("vTAOContract deployed");
 
-    return { wstTAOContract: wstTAOContract as any, owner, otherAccount };
+    return { vTAOContract: vTAOContract as any, owner, otherAccount };
   }
 
   async function checkDeployment() {
@@ -55,38 +55,38 @@ describe("wstTAO", function () {
     if (contract_address == null) {
       throw new Error("contract_address is null");
     }
-    const wstTAOContract = await ethers.getContractAt(
-      "WrappedStakedTAO",
+    const vTAOContract = await ethers.getContractAt(
+      "VirtualTAO",
       contract_address as string
     );
-    await wstTAOContract.waitForDeployment();
+    await vTAOContract.waitForDeployment();
 
-    return { wstTAOContract: wstTAOContract as any, owner, otherAccount };
+    return { vTAOContract: vTAOContract as any, owner, otherAccount };
   }
 
   describe("Deployment", function () {
     it("Should deploy contract with correct decimals", async function () {
-      const { wstTAOContract } = await checkDeployment();
-      expect(await wstTAOContract.decimals()).to.equal(DECIMALS);
+      const { vTAOContract } = await checkDeployment();
+      expect(await vTAOContract.decimals()).to.equal(DECIMALS);
     });
 
     it("Should deploy contract with correct symbol", async function () {
-      const { wstTAOContract } = await checkDeployment();
-      const symbol = await wstTAOContract.symbol();
+      const { vTAOContract } = await checkDeployment();
+      const symbol = await vTAOContract.symbol();
       console.log("symbol", symbol);
-      expect(symbol).to.equal("wstTAO");
+      expect(symbol).to.equal("vTAO");
     });
 
     it("Should deploy contract with correct name", async function () {
-      const { wstTAOContract } = await checkDeployment();
-      const name = await wstTAOContract.name();
+      const { vTAOContract } = await checkDeployment();
+      const name = await vTAOContract.name();
       console.log("name", name);
-      expect(name).to.equal("Wrapped Staked TAO");
+      expect(name).to.equal("Virtual TAO");
     });
 
     it("Should deploy contract with correct initial supply", async function () {
-      const { wstTAOContract } = await checkDeployment();
-      const totalSupply = await wstTAOContract.totalSupply();
+      const { vTAOContract } = await checkDeployment();
+      const totalSupply = await vTAOContract.totalSupply();
       console.log("totalSupply", totalSupply);
       expect(totalSupply).to.equal(0);
     });
@@ -95,8 +95,8 @@ describe("wstTAO", function () {
   describe("Staking", function () {
     describe("Happy paths", function () {
       it("Should stake close to the amount staked", async function () {
-        const { wstTAOContract, otherAccount } = await checkDeployment();
-        const ca = await wstTAOContract.getAddress();
+        const { vTAOContract, otherAccount } = await checkDeployment();
+        const ca = await vTAOContract.getAddress();
 
         const toStake = 0.5;
         const toStakeAsBigInt = ethers.parseUnits(
@@ -117,25 +117,25 @@ describe("wstTAO", function () {
         expect(balance).to.be.greaterThanOrEqual(reqBalance);
 
         // Run the stake transaction
-        const tx = await wstTAOContract
+        const tx = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, { value: toStakeAsBigInt });
 
         await tx.wait();
 
-        const balanceOfOtherAccount = await wstTAOContract.balanceOf(
+        const balanceOfOtherAccount = await vTAOContract.balanceOf(
           otherAccount.address
         );
-        console.log("wstTAO balanceOfOtherAccount", balanceOfOtherAccount);
+        console.log("vTAO balanceOfOtherAccount", balanceOfOtherAccount);
 
-        // Expect the wstTAO balance of otherAccount to be close to the amount staked
+        // Expect the vTAO balance of otherAccount to be close to the amount staked
         expect(balanceOfOtherAccount).to.be.closeTo(
           toStakeAsBigInt,
           toStakeAsBigInt / 1000000n
         );
 
-        // Expect the wstTAO balance of the contract to be 0
-        expect(await wstTAOContract.balanceOf(ca)).to.be.closeTo(
+        // Expect the vTAO balance of the contract to be 0
+        expect(await vTAOContract.balanceOf(ca)).to.be.closeTo(
           0,
           toStakeAsBigInt / 1000000n
         );
@@ -146,7 +146,7 @@ describe("wstTAO", function () {
         expect(balanceOfContract).to.be.closeTo(0, toStakeAsBigInt / 1000000n);
 
         // Check stake balance of contract
-        const stakeBalance = await wstTAOContract.getCurrentStake(0);
+        const stakeBalance = await vTAOContract.getCurrentStake(0);
         console.log("stakeBalance", stakeBalance);
         expect(stakeBalance).to.be.closeTo(
           toStakeRaoDecimals,
@@ -155,8 +155,8 @@ describe("wstTAO", function () {
       });
 
       it("Should unstake close to the amount staked", async function () {
-        const { wstTAOContract, otherAccount } = await checkDeployment();
-        const ca = await wstTAOContract.getAddress();
+        const { vTAOContract, otherAccount } = await checkDeployment();
+        const ca = await vTAOContract.getAddress();
 
         // Check balance of contract at start of test
         const contract_balanceBefore = await ethers.provider.getBalance(ca);
@@ -170,7 +170,7 @@ describe("wstTAO", function () {
 
         console.log(`staking ${toStake0} TAO`);
         // Run the stake transaction
-        const tx0 = await wstTAOContract
+        const tx0 = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, { value: toStake0AsBigInt });
 
@@ -178,7 +178,7 @@ describe("wstTAO", function () {
 
         console.log("stake done");
 
-        const currentBalance: bigint = await wstTAOContract.balanceOf(
+        const currentBalance: bigint = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", currentBalance);
@@ -200,20 +200,20 @@ describe("wstTAO", function () {
         console.log("user free balance:", balance);
         expect(balance).to.be.greaterThanOrEqual(reqBalance);
 
-        const stakeBalanceBefore = await wstTAOContract.getCurrentStake(0);
+        const stakeBalanceBefore = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", stakeBalanceBefore);
 
         console.log(`staking ${toStake} TAO again`);
 
         // Run the stake transaction again
-        const tx1 = await wstTAOContract
+        const tx1 = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, { value: toStakeAsBigInt });
 
         await tx1.wait();
 
         // check balance of otherAccount
-        const newBalance: bigint = await wstTAOContract.balanceOf(
+        const newBalance: bigint = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", newBalance);
@@ -223,7 +223,7 @@ describe("wstTAO", function () {
         );
 
         // Check stake balance of contract after staking
-        const stakeBalanceAfter = await wstTAOContract.getCurrentStake(0);
+        const stakeBalanceAfter = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", stakeBalanceAfter);
         expect(stakeBalanceAfter).to.be.closeTo(
           stakeBalanceBefore + toStakeRaoDecimals,
@@ -233,13 +233,13 @@ describe("wstTAO", function () {
         console.log(`unstaking ${newBalance - currentBalance} CA-balance`);
         const toUnstake: bigint = newBalance - currentBalance;
         // ===== Unstake it =====
-        const unstakeTx = await wstTAOContract
+        const unstakeTx = await vTAOContract
           .connect(otherAccount)
           .unstake(toUnstake - 1n);
         await unstakeTx.wait();
 
         // check balance of otherAccount after unstaking
-        const newBalance2 = await wstTAOContract.balanceOf(
+        const newBalance2 = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", newBalance2);
@@ -257,7 +257,7 @@ describe("wstTAO", function () {
         );
 
         // Check stake balance of contract after unstaking
-        const stakeBalanceAfter2 = await wstTAOContract.getCurrentStake(0);
+        const stakeBalanceAfter2 = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", stakeBalanceAfter2);
         expect(stakeBalanceAfter2).to.be.closeTo(
           stakeBalanceBefore,
@@ -266,11 +266,11 @@ describe("wstTAO", function () {
       });
 
       it("Should allow a larger stake after a small initial stake", async function () {
-        const { wstTAOContract, otherAccount } = await checkDeployment();
-        const ca = await wstTAOContract.getAddress();
+        const { vTAOContract, otherAccount } = await checkDeployment();
+        const ca = await vTAOContract.getAddress();
 
         // Check stake of contract at start of test
-        const contract_stakeBefore = await wstTAOContract.getCurrentStake(0);
+        const contract_stakeBefore = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", contract_stakeBefore);
 
         // Check contract balance at start of test
@@ -278,7 +278,7 @@ describe("wstTAO", function () {
         console.log("contract free balance:", contract_balanceBefore);
 
         // Check user balance at start of test
-        const user_balanceBefore = await wstTAOContract.balanceOf(
+        const user_balanceBefore = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", user_balanceBefore);
@@ -304,25 +304,25 @@ describe("wstTAO", function () {
         expect(balance).to.be.greaterThanOrEqual(reqBalance);
 
         // Run the stake transaction
-        const tx = await wstTAOContract
+        const tx = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, { value: toStakeInitialAsBigInt });
 
         await tx.wait();
 
-        const balanceOfOtherAccount = await wstTAOContract.balanceOf(
+        const balanceOfOtherAccount = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", balanceOfOtherAccount);
 
-        // Expect the increase in wstTAO balance of otherAccount to be close to the amount staked
+        // Expect the increase in vTAO balance of otherAccount to be close to the amount staked
         expect(balanceOfOtherAccount).to.be.closeTo(
           toStakeInitialAsBigInt + user_balanceBefore,
           toStakeInitialAsBigInt / 1000000n
         );
 
-        // Expect the wstTAO balance of the contract to be 0
-        expect(await wstTAOContract.balanceOf(ca)).to.be.closeTo(
+        // Expect the vTAO balance of the contract to be 0
+        expect(await vTAOContract.balanceOf(ca)).to.be.closeTo(
           0,
           toStakeInitialAsBigInt / 1000000n
         );
@@ -336,7 +336,7 @@ describe("wstTAO", function () {
         );
 
         // Check stake balance of contract
-        const stakeBalance = await wstTAOContract.getCurrentStake(0);
+        const stakeBalance = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", stakeBalance);
         expect(stakeBalance).to.be.closeTo(
           contract_stakeBefore + toStakeRaoDecimals,
@@ -356,14 +356,14 @@ describe("wstTAO", function () {
         );
 
         // Run the stake transaction
-        const tx2 = await wstTAOContract
+        const tx2 = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, { value: toStakeBigAsBigInt });
 
         await tx2.wait();
 
         // Check the stake of the contract
-        const stakeBalanceAfter2 = await wstTAOContract.getCurrentStake(0);
+        const stakeBalanceAfter2 = await vTAOContract.getCurrentStake(0);
         console.log("stakeBalanceAfter2", stakeBalanceAfter2);
         expect(stakeBalanceAfter2).to.be.closeTo(
           stakeBalance + toStakeBigRaoDecimals,
@@ -371,7 +371,7 @@ describe("wstTAO", function () {
         );
 
         // Check the balance of the staker
-        const balanceOfOtherAccount2 = await wstTAOContract.balanceOf(
+        const balanceOfOtherAccount2 = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", balanceOfOtherAccount2);
@@ -383,11 +383,11 @@ describe("wstTAO", function () {
       });
 
       it("Should allow a smaller stake after a large initial stake", async function () {
-        const { wstTAOContract, otherAccount } = await checkDeployment();
-        const ca = await wstTAOContract.getAddress();
+        const { vTAOContract, otherAccount } = await checkDeployment();
+        const ca = await vTAOContract.getAddress();
 
         // Check stake of contract at start of test
-        const contract_stakeBefore = await wstTAOContract.getCurrentStake(0);
+        const contract_stakeBefore = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", contract_stakeBefore);
 
         // Check contract balance at start of test
@@ -395,7 +395,7 @@ describe("wstTAO", function () {
         console.log("contract free balance:", contract_balanceBefore);
 
         // Check user balance at start of test
-        const user_balanceBefore = await wstTAOContract.balanceOf(
+        const user_balanceBefore = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", user_balanceBefore);
@@ -421,25 +421,25 @@ describe("wstTAO", function () {
         expect(balance).to.be.greaterThanOrEqual(reqBalance);
 
         // Run the stake transaction
-        const tx = await wstTAOContract
+        const tx = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, { value: toStakeInitialAsBigInt });
 
         await tx.wait();
 
-        const balanceOfOtherAccount = await wstTAOContract.balanceOf(
+        const balanceOfOtherAccount = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", balanceOfOtherAccount);
 
-        // Expect the wstTAO balance of otherAccount to be close to the amount staked
+        // Expect the vTAO balance of otherAccount to be close to the amount staked
         expect(balanceOfOtherAccount).to.be.closeTo(
           toStakeInitialAsBigInt + user_balanceBefore,
           toStakeInitialAsBigInt / 1000000n
         );
 
-        // Expect the wstTAO balance of the contract to be 0
-        expect(await wstTAOContract.balanceOf(ca)).to.be.closeTo(
+        // Expect the vTAO balance of the contract to be 0
+        expect(await vTAOContract.balanceOf(ca)).to.be.closeTo(
           0,
           toStakeInitialAsBigInt / 1000000n
         );
@@ -453,7 +453,7 @@ describe("wstTAO", function () {
         );
 
         // Check stake balance of contract
-        const stakeBalance = await wstTAOContract.getCurrentStake(0);
+        const stakeBalance = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", stakeBalance);
         expect(stakeBalance).to.be.closeTo(
           contract_stakeBefore + toStakeRaoDecimals,
@@ -473,14 +473,14 @@ describe("wstTAO", function () {
         );
 
         // Run the stake transaction
-        const tx2 = await wstTAOContract
+        const tx2 = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, { value: toStakeSmallAsBigInt });
 
         await tx2.wait();
 
         // Check the stake of the contract
-        const stakeBalanceAfter2 = await wstTAOContract.getCurrentStake(0);
+        const stakeBalanceAfter2 = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", stakeBalanceAfter2);
         expect(stakeBalanceAfter2).to.be.closeTo(
           stakeBalance + toStakeSmallRaoDecimals,
@@ -488,7 +488,7 @@ describe("wstTAO", function () {
         );
 
         // Check the balance of the staker
-        const balanceOfOtherAccount2 = await wstTAOContract.balanceOf(
+        const balanceOfOtherAccount2 = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", balanceOfOtherAccount2);
@@ -502,7 +502,7 @@ describe("wstTAO", function () {
 
     describe("Unhappy paths", function () {
       it("Should not allow a stake of 0", async function () {
-        const { wstTAOContract, otherAccount } = await checkDeployment();
+        const { vTAOContract, otherAccount } = await checkDeployment();
         // Stake the inital minimum balance
         const toStakeInitial = 0.25;
         const toStakeInitialAsBigInt = ethers.parseUnits(
@@ -510,7 +510,7 @@ describe("wstTAO", function () {
           DECIMALS
         );
 
-        const tx1 = await wstTAOContract.stake(otherAccount.address, {
+        const tx1 = await vTAOContract.stake(otherAccount.address, {
           value: toStakeInitialAsBigInt,
         });
         await tx1.wait();
@@ -522,14 +522,14 @@ describe("wstTAO", function () {
           DECIMALS
         );
 
-        const tx = wstTAOContract.stake(otherAccount.address, {
+        const tx = vTAOContract.stake(otherAccount.address, {
           value: toStakeAsBigInt,
         });
         await expect(tx).to.be.revertedWith(/can't stake zero/);
       });
 
       it("Should not allow a stake of below the minimum stake", async function () {
-        const { wstTAOContract, otherAccount } = await checkDeployment();
+        const { vTAOContract, otherAccount } = await checkDeployment();
         // Stake the inital minimum balance
         const toStakeInitial = 0.25;
         const toStakeInitialAsBigInt = ethers.parseUnits(
@@ -537,7 +537,7 @@ describe("wstTAO", function () {
           DECIMALS
         );
 
-        const tx1 = await wstTAOContract.stake(otherAccount.address, {
+        const tx1 = await vTAOContract.stake(otherAccount.address, {
           value: toStakeInitialAsBigInt,
         });
         await tx1.wait();
@@ -550,7 +550,7 @@ describe("wstTAO", function () {
           DECIMALS
         );
 
-        const tx = wstTAOContract.stake(otherAccount.address, {
+        const tx = vTAOContract.stake(otherAccount.address, {
           value: toStakeAsBigInt,
         });
         await expect(tx).to.be.revertedWith(
@@ -559,15 +559,15 @@ describe("wstTAO", function () {
       });
 
       it("Should not allow a user to unstake more than their balance", async function () {
-        const { wstTAOContract, otherAccount } = await checkDeployment();
-        const ca = await wstTAOContract.getAddress();
+        const { vTAOContract, otherAccount } = await checkDeployment();
+        const ca = await vTAOContract.getAddress();
 
         // Check stake of contract at start of test
-        const contract_stakeBefore = await wstTAOContract.getCurrentStake(0);
+        const contract_stakeBefore = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", contract_stakeBefore);
 
         // Check user balance at start of test
-        const user_balanceBefore = await wstTAOContract.balanceOf(
+        const user_balanceBefore = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", user_balanceBefore);
@@ -583,7 +583,7 @@ describe("wstTAO", function () {
           DECIMALS
         );
 
-        const tx0 = await wstTAOContract
+        const tx0 = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, {
             value: toStakeAsBigInt,
@@ -591,25 +591,25 @@ describe("wstTAO", function () {
         await tx0.wait();
 
         // Get the user's balance after staking
-        const user_balanceAfter = await wstTAOContract.balanceOf(
+        const user_balanceAfter = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", user_balanceAfter);
 
         // Try to unstake more than the user's balance
         const toUnstake = user_balanceAfter;
-        const tx = wstTAOContract.connect(otherAccount).unstake(toUnstake + 1n);
+        const tx = vTAOContract.connect(otherAccount).unstake(toUnstake + 1n);
         await expect(tx).to.be.revertedWith(
           /can't unstake more .+? than user has/
         );
       });
 
       it("Should not give a user more TAO than they have staked, even if the contract goes under min stake", async function () {
-        const { wstTAOContract, otherAccount, owner } = await checkDeployment();
-        const ca = await wstTAOContract.getAddress();
+        const { vTAOContract, otherAccount, owner } = await checkDeployment();
+        const ca = await vTAOContract.getAddress();
 
         // Check stake of contract at start of test
-        const contract_stakeBefore = await wstTAOContract.getCurrentStake(0);
+        const contract_stakeBefore = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", contract_stakeBefore);
 
         // Check contract balance at start of test
@@ -617,7 +617,7 @@ describe("wstTAO", function () {
         console.log("contract free balance:", contract_balanceBefore);
 
         // Check user balance at start of test
-        const user_balanceBefore = await wstTAOContract.balanceOf(
+        const user_balanceBefore = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", user_balanceBefore);
@@ -634,7 +634,7 @@ describe("wstTAO", function () {
         console.log("owner free balance:", owner_freeBefore);
 
         // Check owner balance at start of test
-        const owner_balanceBefore = await wstTAOContract.balanceOf(
+        const owner_balanceBefore = await vTAOContract.balanceOf(
           owner.address
         ); // 0
         console.log("owner CA-balance:", owner_balanceBefore);
@@ -646,13 +646,13 @@ describe("wstTAO", function () {
           DECIMALS
         );
 
-        const tx0 = await wstTAOContract.connect(owner).stake(owner.address, {
+        const tx0 = await vTAOContract.connect(owner).stake(owner.address, {
           value: toStakeAsBigInt,
         });
         await tx0.wait();
 
         // Check owner balance after staking
-        const owner_balanceAfter = await wstTAOContract.balanceOf(
+        const owner_balanceAfter = await vTAOContract.balanceOf(
           owner.address
         );
         console.log("owner CA-balance:", owner_balanceAfter);
@@ -662,7 +662,7 @@ describe("wstTAO", function () {
         console.log("owner free balance:", owner_freeAfter);
 
         // Check contract stake after staking
-        const contract_stakeAfter = await wstTAOContract.getCurrentStake(0);
+        const contract_stakeAfter = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", contract_stakeAfter);
 
         // Check contract balance after staking
@@ -670,7 +670,7 @@ describe("wstTAO", function () {
         console.log("contract free balance:", contract_balanceAfter);
 
         // Stake as the user
-        const tx1 = await wstTAOContract
+        const tx1 = await vTAOContract
           .connect(otherAccount)
           .stake(otherAccount.address, {
             value: toStakeAsBigInt,
@@ -678,7 +678,7 @@ describe("wstTAO", function () {
         await tx1.wait();
 
         // Check user balance after staking
-        const user_balanceAfter = await wstTAOContract.balanceOf(
+        const user_balanceAfter = await vTAOContract.balanceOf(
           otherAccount.address
         );
         console.log("user CA-balance:", user_balanceAfter);
@@ -690,7 +690,7 @@ describe("wstTAO", function () {
         console.log("user free balance:", user_freeAfter);
 
         // Check contract stake after staking
-        const contract_stakeAfter2 = await wstTAOContract.getCurrentStake(0);
+        const contract_stakeAfter2 = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", contract_stakeAfter2);
 
         // Check contract balance after staking
@@ -700,24 +700,24 @@ describe("wstTAO", function () {
         // Unstake as the owner, leave just under min stake
         const minStakeBalance = 20_000_000n; // 0.02 TAO
         const toUnstakeOwner = owner_balanceAfter - minStakeBalance;
-        const tx3 = await wstTAOContract.connect(owner).unstake(toUnstakeOwner);
+        const tx3 = await vTAOContract.connect(owner).unstake(toUnstakeOwner);
         await tx3.wait();
 
         // Check owner balance after unstaking
-        const owner_balanceAfter3 = await wstTAOContract.balanceOf(
+        const owner_balanceAfter3 = await vTAOContract.balanceOf(
           owner.address
         );
         console.log("owner CA-balance:", owner_balanceAfter3);
 
         // Check contract stake after unstaking
-        const contract_stakeAfter3 = await wstTAOContract.getCurrentStake(0);
+        const contract_stakeAfter3 = await vTAOContract.getCurrentStake(0);
         console.log("contract stake:", contract_stakeAfter3);
         expect(contract_stakeAfter3).to.not.be.closeTo(0, 1000n);
 
         // Unstake as the user. This should unstake all of the user's balance
         // and leave the contract under the min_stake_balance
         const toUnstake = user_balanceAfter;
-        const tx2 = wstTAOContract
+        const tx2 = vTAOContract
           .connect(otherAccount)
           .unstake(toUnstake - 1n);
 

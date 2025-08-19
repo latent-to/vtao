@@ -43,8 +43,8 @@ const deploy: DeployFunction = async (hre) => {
     const { address } = await deploy(contractName, {
         from: deployer,
         args: [
-            'Wrapped Staked TAO', // name
-            'wstTAO', // symbol
+            'Virtual TAO', // name
+            'vTAO', // symbol
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
             deployer, // owner
         ],

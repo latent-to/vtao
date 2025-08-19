@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./BLAKE2b.sol";
 import "./interfaces/IStakingV2.sol";
 
-contract WrappedStakedTAO is
+contract VirtualTAO is
     Initializable,
     ERC20Upgradeable,
     ERC20PausableUpgradeable,
@@ -35,8 +35,8 @@ contract WrappedStakedTAO is
     bytes private constant evm_prefix = hex"65766d3a";
     uint256 private _decimalConversionFactor;
 
-    string public constant NAME = "Wrapped Staked TAO";
-    string public constant SYMBOL = "wstTAO";
+    string public constant NAME = "Virtual TAO";
+    string public constant SYMBOL = "vTAO";
     uint public constant INITIAL_SUPPLY = 0;
 
     uint256 public constant MIN_STAKE_AMOUNT = 0.0002 ether; // 0.0002 TAO
@@ -96,10 +96,10 @@ contract WrappedStakedTAO is
     }
 
     function _stakeWithAmount(address to, uint256 amountEvm) private {
-        require(amountEvm > 0, "wstTAO: can't stake zero TAO");
+        require(amountEvm > 0, "vTAO: can't stake zero TAO");
         require(
             amountEvm >= MIN_STAKE_AMOUNT,
-            "wstTAO: can't stake less than the min amount."
+            "vTAO: can't stake less than the min amount."
         );
 
         // Get the current stake of the contract, this will be in RAO decimals
@@ -117,52 +117,52 @@ contract WrappedStakedTAO is
         uint256 newStakeRaoDecimals = getCurrentStake(_netuid);
         require(
             newStakeRaoDecimals > currentStakeRaoDecimals,
-            "wstTAO: stake didn't increase"
+            "vTAO: stake didn't increase"
         );
         // Calculate the amount of TAO staked
         uint256 amountStakedRaoDecimals = newStakeRaoDecimals -
             currentStakeRaoDecimals;
-        // Calculate the amount of wstTAO to mint
-        uint256 amountToMintEvmDecimals = TAOtowstTAO_with_current_stake(
+        // Calculate the amount of vTAO to mint
+        uint256 amountToMintEvmDecimals = TAOtovTAO_with_current_stake(
             amountStakedRaoDecimals,
             currentStakeRaoDecimals
         );
-        require(amountToMintEvmDecimals > 0, "wstTAO: amount to mint is zero");
-        // Mint the wstTAO
+        require(amountToMintEvmDecimals > 0, "vTAO: amount to mint is zero");
+        // Mint the vTAO
         _mint(to, amountToMintEvmDecimals);
     }
 
     function unstake(uint256 amountEvm) public nonReentrant {
-        require(amountEvm > 0, "wstTAO: can't unstake zero wstTAO");
+        require(amountEvm > 0, "vTAO: can't unstake zero vTAO");
         require(
             amountEvm > MIN_STAKE_AMOUNT,
-            "wstTAO: can't unstake less than the min amount."
+            "vTAO: can't unstake less than the min amount."
         );
 
         require(
             getCurrentStake(_netuid) > 0,
-            "wstTAO: can't unstake wstTAO if the contract has no stake"
+            "vTAO: can't unstake vTAO if the contract has no stake"
         );
 
         address from = msg.sender;
         require(
             balanceOf(from) >= amountEvm,
-            "wstTAO: can't unstake more wstTAO than user has"
+            "vTAO: can't unstake more vTAO than user has"
         );
 
-        // Convert the wstTAO to TAO; This is the amount we will unstake
-        uint256 amountInTAORaoDecimals = wstTAOtoTAO(amountEvm);
+        // Convert the vTAO to TAO; This is the amount we will unstake
+        uint256 amountInTAORaoDecimals = vTAOtoTAO(amountEvm);
         uint256 amountInTAOEvmDecimals = _decimalConversionFactor *
             amountInTAORaoDecimals;
         // Get the balance of the contract before unstaking
         uint256 balanceBeforeEvmDecimals = address(this).balance;
-        // Unstake the wstTAO amount
+        // Unstake the vTAO amount
         _safeUnstake(_hotkey, amountInTAORaoDecimals, _netuid);
         // Get the balance of the contract after unstaking
         uint256 balanceAfterEvmDecimals = address(this).balance;
         require(
             balanceAfterEvmDecimals > balanceBeforeEvmDecimals,
-            "wstTAO: balance didn't increase"
+            "vTAO: balance didn't increase"
         );
 
         // Calculate the actual amount of TAO the contract got from the unstake
@@ -172,7 +172,7 @@ contract WrappedStakedTAO is
 
         require(
             actualAmountInTAOEvmDecimals <= amountInTAOEvmDecimals,
-            "wstTAO: unstake got more than expected"
+            "vTAO: unstake got more than expected"
         );
 
         // Only allow unstake up to the amount of TAO the balance should've corresponded to
@@ -181,7 +181,7 @@ contract WrappedStakedTAO is
             actualAmountInTAOEvmDecimals
         );
 
-        // Burn the wstTAO
+        // Burn the vTAO
         _burn(from, amountEvm);
         // Transfer the actual amount of TAO from our contract
         _safeTransferTAO(from, amountToSend);
@@ -192,12 +192,12 @@ contract WrappedStakedTAO is
         uint256 amountRaoDecimals,
         uint16 netuid
     ) private {
-        require(amountRaoDecimals > 0, "wstTAO: can't unstake zero TAO");
+        require(amountRaoDecimals > 0, "vTAO: can't unstake zero TAO");
 
         uint256 currentStake = getCurrentStake(netuid);
         require(
             currentStake >= amountRaoDecimals,
-            "wstTAO: current stake is lower than expected"
+            "vTAO: current stake is lower than expected"
         );
 
         (bool success, ) = ISTAKING_ADDRESS.call(
@@ -208,7 +208,7 @@ contract WrappedStakedTAO is
                 uint256(netuid)
             )
         );
-        require(success, "wstTAO: failed to unstake");
+        require(success, "vTAO: failed to unstake");
     }
 
     function _safeStake(
@@ -216,9 +216,9 @@ contract WrappedStakedTAO is
         uint256 amountEvm,
         uint16 netuid
     ) private {
-        require(amountEvm > 0, "wstTAO: can't stake zero wstTAO");
+        require(amountEvm > 0, "vTAO: can't stake zero vTAO");
         uint256 amountRaoDecimals = amountEvm / _decimalConversionFactor;
-        //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
+        //require(address(this).balance >= amount, "vTAO: contract does not have enough balance in unstaked");
         (bool success, ) = ISTAKING_ADDRESS.call(
             abi.encodeWithSelector(
                 IStaking.addStake.selector,
@@ -227,7 +227,7 @@ contract WrappedStakedTAO is
                 netuid
             )
         );
-        require(success, "wstTAO: failed to stake");
+        require(success, "vTAO: failed to stake");
     }
 
     function stake(address to) public payable nonReentrant {
@@ -244,7 +244,7 @@ contract WrappedStakedTAO is
                 currentStakeRaoDecimals +
                     (amountEvm / _decimalConversionFactor) >=
                     MIN_STAKE_BALANCE,
-                "wstTAO: can't have a stake balance less than the min stake balance."
+                "vTAO: can't have a stake balance less than the min stake balance."
             );
 
             _stakeWithAmount(to, amountEvm);
@@ -259,11 +259,11 @@ contract WrappedStakedTAO is
     }
 
     /**
-     * @notice Convert wstTAO to TAO
-     * @param amountEvm The amount of wstTAO to convert
+     * @notice Convert vTAO to TAO
+     * @param amountEvm The amount of vTAO to convert
      * @return amountRaoDecimals The amount of TAO in RAO decimals
      */
-    function wstTAOtoTAO(uint256 amountEvm) public view returns (uint256) {
+    function vTAOtoTAO(uint256 amountEvm) public view returns (uint256) {
         uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
         uint256 currentIssuance = super.totalSupply();
         if (currentIssuance == 0) {
@@ -272,7 +272,7 @@ contract WrappedStakedTAO is
         return (amountEvm * currentStakeRaoDecimals) / currentIssuance;
     }
 
-    function TAOtowstTAO_with_current_stake(
+    function TAOtovTAO_with_current_stake(
         uint256 amountRaoDecimals,
         uint256 currentStakeRaoDecimals
     ) public view returns (uint256) {
@@ -284,7 +284,7 @@ contract WrappedStakedTAO is
         return (amountRaoDecimals * currentIssuance) / currentStakeRaoDecimals;
     }
 
-    function TAOtowstTAO(
+    function TAOtovTAO(
         uint256 amountRaoDecimals
     ) public view returns (uint256) {
         uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
@@ -297,9 +297,9 @@ contract WrappedStakedTAO is
     }
 
     function _safeTransferTAO(address to, uint256 amountEvm) private {
-        //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
+        //require(address(this).balance >= amount, "vTAO: contract does not have enough balance in unstaked");
         (bool sent, ) = to.call{value: amountEvm, gas: gasleft()}("");
-        require(sent, "wstTAO: failed to send TAO");
+        require(sent, "vTAO: failed to send TAO");
     }
 
     function getCurrentStake(uint16 netuid) public view returns (uint256) {

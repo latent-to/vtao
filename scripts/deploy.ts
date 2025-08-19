@@ -3,19 +3,19 @@ import fs from "fs";
 
 async function main() {
 
-  const wstTAO = await ethers.getContractFactory("WrappedStakedTAO"); // Has access to private fields
+  const vTAO = await ethers.getContractFactory("VirtualTAO"); // Has access to private fields
   const [owner, otherAccount, thirdAccount] = await ethers.getSigners();
-  const wstTAOContract = await upgrades.deployProxy(wstTAO, [owner.address], { initializer: 'initialize' });
-  await wstTAOContract.waitForDeployment();
+  const vTAOContract = await upgrades.deployProxy(vTAO, [owner.address], { initializer: 'initialize' });
+  await vTAOContract.waitForDeployment();
 
   console.log(
-    `wstTAO deployed to ${wstTAOContract.target}`
+    `vTAO deployed to ${vTAOContract.target}`
   );
 
   // Save deployment address and ABI
   const deployedContract = {
-    address: wstTAOContract.target,
-    abi: JSON.parse(wstTAOContract.interface.formatJson())
+    address: vTAOContract.target,
+    abi: JSON.parse(vTAOContract.interface.formatJson())
   };
   fs.writeFileSync("./deployed-contract.json", JSON.stringify(deployedContract));
 }

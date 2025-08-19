@@ -1,9 +1,9 @@
 {
-  "name": "wsttao",
+  "name": "vtao",
   "version": "1.0.0",
   "description": "A Wrapped Staked TAO ERC-20",
   "main": "index.js",
-  "repository": "https://github.com/latent-to/wsttao",
+  "repository": "https://github.com/latent-to/vtao",
   "author": "camfairchild",
   "license": "MIT",
   "private": true,
