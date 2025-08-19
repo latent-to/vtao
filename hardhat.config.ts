@@ -18,12 +18,16 @@ const hardhatConfig: HardhatUserConfig = {
   defaultNetwork: "subevm",
   networks: {
     testnet: {
-      url: "https://bittensor-testnet-lite-public.nodies.app",
-      accounts: [config.ethPrivateKey]
+      url: "https://test.chain.opentensor.ai",
+      accounts: [config.ethPrivateKey, config.ethPrivateKey1]
     },
     subevm: {
       url: "https://lite.chain.opentensor.ai",
       accounts: [config.ethPrivateKey]
+    },
+    localnet: {
+      url: "http://127.0.0.1:9945",
+      accounts: [config.ethPrivateKey, config.ethPrivateKey1]
     }
   },
   mocha: {

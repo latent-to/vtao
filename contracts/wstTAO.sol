@@ -11,10 +11,21 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
+import "@openzeppelin/contracts/utils/math/Math.sol";
+
 import "./BLAKE2b.sol";
 import "./interfaces/IStakingV2.sol";
 
-contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, UUPSUpgradeable, ERC20BurnableUpgradeable, ReentrancyGuardUpgradeable {
+contract WrappedStakedTAO is
+    Initializable,
+    ERC20Upgradeable,
+    ERC20PausableUpgradeable,
+    OwnableUpgradeable,
+    ERC20PermitUpgradeable,
+    UUPSUpgradeable,
+    ERC20BurnableUpgradeable,
+    ReentrancyGuardUpgradeable
+{
     // Precompile instances
     BLAKE2b private blake2bInstance;
 
@@ -28,16 +39,16 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
     string public constant SYMBOL = "wstTAO";
     uint public constant INITIAL_SUPPLY = 0;
 
-    uint256 public constant MIN_STAKE_AMOUNT = 0.0005 ether;
-    uint256 public constant MIN_STAKE_BALANCE = 0.1 ether;
-    
+    uint256 public constant MIN_STAKE_AMOUNT = 0.0002 ether; // 0.0002 TAO
+    // Must be in RAO decimals
+    uint256 public constant MIN_STAKE_BALANCE = 200_000_000; // 0.2 TAO
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address initialOwner) initializer public {
+    function initialize(address initialOwner) public initializer {
         __ERC20_init(NAME, SYMBOL);
         __ERC20Burnable_init();
         __ERC20Pausable_init();
@@ -70,177 +81,245 @@ contract WrappedStakedTAO is Initializable, ERC20Upgradeable, ERC20PausableUpgra
         _unpause();
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        onlyOwner
-        override
-    {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {}
 
     // The following functions are overrides required by Solidity.
 
-    function _update(address from, address to, uint256 value)
-        internal
-        override(ERC20Upgradeable, ERC20PausableUpgradeable)
-    {
+    function _update(
+        address from,
+        address to,
+        uint256 value
+    ) internal override(ERC20Upgradeable, ERC20PausableUpgradeable) {
         super._update(from, to, value);
     }
 
-  function _stakeWithAmount(address to, uint256 amountEvm) private {
-    require(amountEvm > 0, "wstTAO: can't stake zero TAO");
-    require(amountEvm >= MIN_STAKE_AMOUNT, "wstTAO: can't stake less than the min amount.");
+    function _stakeWithAmount(address to, uint256 amountEvm) private {
+        require(amountEvm > 0, "wstTAO: can't stake zero TAO");
+        require(
+            amountEvm >= MIN_STAKE_AMOUNT,
+            "wstTAO: can't stake less than the min amount."
+        );
 
-    // Get the current stake of the contract, this will be in RAO decimals
-    uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
+        // Get the current stake of the contract, this will be in RAO decimals
+        uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
 
-    // Initial stake balance needs to be 0.1 TAO, and the addStake fee is 50k RAO
-    if (currentStakeRaoDecimals == 0) {
-      // 0.1 TAO min balance, plus 50k RAO addStake fee
-      require(amountEvm >= 0.100_05 ether, "stake lt minStake + addStake fee");
-    } else {
-      // 500k RAO min stake amount, plus 50k RAO addStake fee
-      require(amountEvm >= 0.000_55 ether, "stake lt minAmt + addStake fee");
+        // Initial stake balance needs to be 0.1 TAO, no addStake fee
+        if (currentStakeRaoDecimals == 0) {
+            // 0.1 TAO min balance
+            require(amountEvm >= MIN_STAKE_BALANCE, "stake lt minStake");
+        }
+
+        // Stake the TAO
+        _safeStake(_hotkey, amountEvm, _netuid);
+        // Get the new stake of the contract
+        uint256 newStakeRaoDecimals = getCurrentStake(_netuid);
+        require(
+            newStakeRaoDecimals > currentStakeRaoDecimals,
+            "wstTAO: stake didn't increase"
+        );
+        // Calculate the amount of TAO staked
+        uint256 amountStakedRaoDecimals = newStakeRaoDecimals -
+            currentStakeRaoDecimals;
+        // Calculate the amount of wstTAO to mint
+        uint256 amountToMintEvmDecimals = TAOtowstTAO_with_current_stake(
+            amountStakedRaoDecimals,
+            currentStakeRaoDecimals
+        );
+        require(amountToMintEvmDecimals > 0, "wstTAO: amount to mint is zero");
+        // Mint the wstTAO
+        _mint(to, amountToMintEvmDecimals);
     }
 
-    // Stake the TAO
-    _safeStake(_hotkey, amountEvm, _netuid);
-    // Get the new stake of the contract
-    uint256 newStakeRaoDecimals = getCurrentStake(_netuid);
-    require(newStakeRaoDecimals > currentStakeRaoDecimals, "wstTAO: stake didn't increase");
-    // Calculate the amount of TAO staked
-    uint256 amountStakedRaoDecimals = newStakeRaoDecimals - currentStakeRaoDecimals;
-    // Calculate the amount of wstTAO to mint
-    uint256 amountToMintEvmDecimals = TAOtowstTAO_with_current_stake(amountStakedRaoDecimals, currentStakeRaoDecimals);
-    require(amountToMintEvmDecimals > 0, "wstTAO: amount to mint is zero");
-    // Mint the wstTAO
-    _mint(to, amountToMintEvmDecimals);
-  }
+    function unstake(uint256 amountEvm) public nonReentrant {
+        require(amountEvm > 0, "wstTAO: can't unstake zero wstTAO");
+        require(
+            amountEvm > MIN_STAKE_AMOUNT,
+            "wstTAO: can't unstake less than the min amount."
+        );
 
-  function unstake(uint256 amountEvm) public nonReentrant {
-    require(amountEvm > 0, "wstTAO: can't unstake zero wstTAO");
-    require(amountEvm > MIN_STAKE_AMOUNT, "wstTAO: can't unstake less than the min amount.");
-  
-    require(getCurrentStake(_netuid) > 0, "wstTAO: can't unstake wstTAO if the contract has no stake");
+        require(
+            getCurrentStake(_netuid) > 0,
+            "wstTAO: can't unstake wstTAO if the contract has no stake"
+        );
 
-    address from = msg.sender;
-    require(balanceOf(from) >= amountEvm, "wstTAO: can't unstake more wstTAO than user has");
+        address from = msg.sender;
+        require(
+            balanceOf(from) >= amountEvm,
+            "wstTAO: can't unstake more wstTAO than user has"
+        );
 
-    uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
-    // Convert the wstTAO to TAO; This is the amount we will unstake
-    uint256 amountInTAORaoDecimals = wstTAOtoTAO(amountEvm);
-    // Get the balance of the contract before unstaking
-    uint256 balanceBeforeEvmDecimals = address(this).balance;
-    // Unstake the wstTAO amount
-    _safeUnstake(_hotkey, amountInTAORaoDecimals, _netuid);
-    // Get the balance of the contract after unstaking
-    uint256 balanceAfterEvmDecimals = address(this).balance;
-    require(balanceAfterEvmDecimals > balanceBeforeEvmDecimals, "wstTAO: balance didn't increase");
-    
-    uint256 newStakeRaoDecimals = getCurrentStake(_netuid);
-    require(currentStakeRaoDecimals - newStakeRaoDecimals <= amountInTAORaoDecimals, "wstTAO: unstaked more than owned");
-    // Calculate the actual amount of TAO the contract got from the unstake
-    // Note: safe from underflow because of solidity version
-    uint256 actualAmountInTAOEvmDecimals = balanceAfterEvmDecimals - balanceBeforeEvmDecimals;
+        // Convert the wstTAO to TAO; This is the amount we will unstake
+        uint256 amountInTAORaoDecimals = wstTAOtoTAO(amountEvm);
+        uint256 amountInTAOEvmDecimals = _decimalConversionFactor *
+            amountInTAORaoDecimals;
+        // Get the balance of the contract before unstaking
+        uint256 balanceBeforeEvmDecimals = address(this).balance;
+        // Unstake the wstTAO amount
+        _safeUnstake(_hotkey, amountInTAORaoDecimals, _netuid);
+        // Get the balance of the contract after unstaking
+        uint256 balanceAfterEvmDecimals = address(this).balance;
+        require(
+            balanceAfterEvmDecimals > balanceBeforeEvmDecimals,
+            "wstTAO: balance didn't increase"
+        );
 
-    // Burn the wstTAO
-    _burn(from, amountEvm);
-    // Transfer the actual amount of TAO from our contract
-    _safeTransferTAO(from, actualAmountInTAOEvmDecimals); 
-  }
+        // Calculate the actual amount of TAO the contract got from the unstake
+        // Note: safe from underflow because of solidity version
+        uint256 actualAmountInTAOEvmDecimals = balanceAfterEvmDecimals -
+            balanceBeforeEvmDecimals;
 
-  function _safeUnstake(bytes32 hotkey, uint256 amountRaoDecimals, uint16 netuid) private {
-    require(amountRaoDecimals > 0, "wstTAO: can't unstake zero TAO");
+        require(
+            actualAmountInTAOEvmDecimals <= amountInTAOEvmDecimals,
+            "wstTAO: unstake got more than expected"
+        );
 
-    uint256 currentStake = getCurrentStake(netuid);
-    require(currentStake >= amountRaoDecimals, "wstTAO: current stake is lower than expected");
+        // Only allow unstake up to the amount of TAO the balance should've corresponded to
+        uint256 amountToSend = Math.min(
+            amountInTAOEvmDecimals,
+            actualAmountInTAOEvmDecimals
+        );
 
-    (bool success, ) = ISTAKING_ADDRESS.call(abi.encodeWithSelector(IStaking.removeStake.selector, hotkey, amountRaoDecimals, uint256(netuid)));
-    require(success, "wstTAO: failed to unstake");
-  }
-
-  function _safeStake(bytes32 hotkey, uint256 amountEvm, uint16 netuid) private {
-    require(amountEvm > 0, "wstTAO: can't stake zero wstTAO");
-    uint256 amountRaoDecimals = amountEvm / _decimalConversionFactor;
-    //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
-    (bool success, ) = ISTAKING_ADDRESS.call(abi.encodeWithSelector(IStaking.addStake.selector, hotkey, amountRaoDecimals, netuid));
-    require(success, "wstTAO: failed to stake");
-  }
-
-  function stake(address to) public payable nonReentrant {
-    uint256 amountEvm = msg.value; // This is the amount in EVM decimals
-
-    uint256 currentBalance = address(this).balance;
-
-    // Allow sending the min balance to the contract without staking
-    if (currentBalance == 0 && amountEvm == 0) {
-      return; // Exit here, donated 500 RAO to the contract
-    } // We can't detect if this is the first deposit 
-    // 500 RAO is negligible, so we ignore it otherwise.
-
-    require(currentBalance + amountEvm >= MIN_STAKE_BALANCE, "wstTAO: can't have a stake balance less than the min balance.");
-    
-    _stakeWithAmount(to, amountEvm);
-  }
-  
-  /**
-  * @notice Shortcut to stake TAO
-  */
-  receive() external payable {
-    stake(msg.sender);
-  }
-
-  /**
-   * @notice Convert wstTAO to TAO
-   * @param amountEvm The amount of wstTAO to convert
-   * @return amountRaoDecimals The amount of TAO in RAO decimals
-   */
-  function wstTAOtoTAO(uint256 amountEvm) view public returns (uint256) {
-    uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
-    uint256 currentIssuance = super.totalSupply();
-    if (currentIssuance == 0) {
-      return 0; // should never happen
+        // Burn the wstTAO
+        _burn(from, amountEvm);
+        // Transfer the actual amount of TAO from our contract
+        _safeTransferTAO(from, amountToSend);
     }
-    return amountEvm * currentStakeRaoDecimals / currentIssuance;
-  }
 
+    function _safeUnstake(
+        bytes32 hotkey,
+        uint256 amountRaoDecimals,
+        uint16 netuid
+    ) private {
+        require(amountRaoDecimals > 0, "wstTAO: can't unstake zero TAO");
 
-  function TAOtowstTAO_with_current_stake(uint256 amountRaoDecimals, uint256 currentStakeRaoDecimals) view public returns (uint256) {
-    uint256 currentIssuance = super.totalSupply();
-    if (currentIssuance == 0 || currentStakeRaoDecimals == 0) {
-      // Issue 1:1, with decimal conversion
-      return amountRaoDecimals * _decimalConversionFactor; // Would happen on init.
+        uint256 currentStake = getCurrentStake(netuid);
+        require(
+            currentStake >= amountRaoDecimals,
+            "wstTAO: current stake is lower than expected"
+        );
+
+        (bool success, ) = ISTAKING_ADDRESS.call(
+            abi.encodeWithSelector(
+                IStaking.removeStake.selector,
+                hotkey,
+                amountRaoDecimals,
+                uint256(netuid)
+            )
+        );
+        require(success, "wstTAO: failed to unstake");
     }
-    return amountRaoDecimals * currentIssuance / currentStakeRaoDecimals;
-  }
 
-  function TAOtowstTAO(uint256 amountRaoDecimals) view public returns (uint256) {
-    uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
-    uint256 currentIssuance = super.totalSupply();
-    if (currentIssuance == 0 || currentStakeRaoDecimals == 0) {
-      // Issue 1:1, with decimal conversion
-      return amountRaoDecimals * _decimalConversionFactor; // Would happen on init.
+    function _safeStake(
+        bytes32 hotkey,
+        uint256 amountEvm,
+        uint16 netuid
+    ) private {
+        require(amountEvm > 0, "wstTAO: can't stake zero wstTAO");
+        uint256 amountRaoDecimals = amountEvm / _decimalConversionFactor;
+        //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
+        (bool success, ) = ISTAKING_ADDRESS.call(
+            abi.encodeWithSelector(
+                IStaking.addStake.selector,
+                hotkey,
+                amountRaoDecimals,
+                netuid
+            )
+        );
+        require(success, "wstTAO: failed to stake");
     }
-    return amountRaoDecimals * currentIssuance / currentStakeRaoDecimals;
-  }
 
-  function _safeTransferTAO(address to, uint256 amountEvm) private {
-    //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
-    (bool sent, ) = to.call{value: amountEvm, gas: gasleft()}("");
-    require(sent, "wstTAO: failed to send TAO");
-  }
+    function stake(address to) public payable nonReentrant {
+        uint256 amountEvm = msg.value; // This is the amount in EVM decimals
 
-  function getCurrentStake(uint16 netuid) public view returns (uint256) {
-    (bool success, bytes memory resultData) = ISTAKING_ADDRESS.staticcall(
-      abi.encodeWithSelector(IStaking.getStake.selector, _hotkey, _address_as_pk, netuid)
-    );
-  
-    require(success, "Failed to read getStake");
-    if (resultData.length == 0) {
-      return 0;
+        uint256 currentBalance = address(this).balance;
+
+        if (amountEvm == 0.000_000_500 ether && currentBalance == 0 ether) {
+            return; // Allow donating 500 RAO to the contract
+        } else {
+            uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
+            // Otherwise, require the stake balance to be at least the min balance
+            require(
+                currentStakeRaoDecimals +
+                    (amountEvm / _decimalConversionFactor) >=
+                    MIN_STAKE_BALANCE,
+                "wstTAO: can't have a stake balance less than the min stake balance."
+            );
+
+            _stakeWithAmount(to, amountEvm);
+        }
     }
-    return abi.decode(resultData, (uint256));
-  }
-  
-  function getAddressAsPk() public view returns (bytes32) {
-    return _address_as_pk;
-  }
+
+    /**
+     * @notice Shortcut to stake TAO
+     */
+    receive() external payable {
+        stake(msg.sender);
+    }
+
+    /**
+     * @notice Convert wstTAO to TAO
+     * @param amountEvm The amount of wstTAO to convert
+     * @return amountRaoDecimals The amount of TAO in RAO decimals
+     */
+    function wstTAOtoTAO(uint256 amountEvm) public view returns (uint256) {
+        uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
+        uint256 currentIssuance = super.totalSupply();
+        if (currentIssuance == 0) {
+            return 0; // should never happen
+        }
+        return (amountEvm * currentStakeRaoDecimals) / currentIssuance;
+    }
+
+    function TAOtowstTAO_with_current_stake(
+        uint256 amountRaoDecimals,
+        uint256 currentStakeRaoDecimals
+    ) public view returns (uint256) {
+        uint256 currentIssuance = super.totalSupply();
+        if (currentIssuance == 0 || currentStakeRaoDecimals == 0) {
+            // Issue 1:1, with decimal conversion
+            return amountRaoDecimals * _decimalConversionFactor; // Would happen on init.
+        }
+        return (amountRaoDecimals * currentIssuance) / currentStakeRaoDecimals;
+    }
+
+    function TAOtowstTAO(
+        uint256 amountRaoDecimals
+    ) public view returns (uint256) {
+        uint256 currentStakeRaoDecimals = getCurrentStake(_netuid);
+        uint256 currentIssuance = super.totalSupply();
+        if (currentIssuance == 0 || currentStakeRaoDecimals == 0) {
+            // Issue 1:1, with decimal conversion
+            return amountRaoDecimals * _decimalConversionFactor; // Would happen on init.
+        }
+        return (amountRaoDecimals * currentIssuance) / currentStakeRaoDecimals;
+    }
+
+    function _safeTransferTAO(address to, uint256 amountEvm) private {
+        //require(address(this).balance >= amount, "wstTAO: contract does not have enough balance in unstaked");
+        (bool sent, ) = to.call{value: amountEvm, gas: gasleft()}("");
+        require(sent, "wstTAO: failed to send TAO");
+    }
+
+    function getCurrentStake(uint16 netuid) public view returns (uint256) {
+        (bool success, bytes memory resultData) = ISTAKING_ADDRESS.staticcall(
+            abi.encodeWithSelector(
+                IStaking.getStake.selector,
+                _hotkey,
+                _address_as_pk,
+                netuid
+            )
+        );
+
+        require(success, "Failed to read getStake");
+        if (resultData.length == 0) {
+            return 0;
+        }
+        return abi.decode(resultData, (uint256));
+    }
+
+    function getAddressAsPk() public view returns (bytes32) {
+        return _address_as_pk;
+    }
 }
