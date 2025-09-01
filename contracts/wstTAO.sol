@@ -26,6 +26,19 @@ contract VirtualTAO is
     ERC20BurnableUpgradeable,
     ReentrancyGuardUpgradeable
 {
+    event TAOStaked(
+        address indexed signer,
+        address indexed to,
+        uint256 amountEvm,
+        uint256 receivedAmount
+    );
+    event TAOUnstaked(
+        address indexed signer,
+        address indexed from,
+        uint256 amountEvm,
+        uint256 receivedAmount
+    );
+
     // Precompile instances
     BLAKE2b private blake2bInstance;
 
@@ -130,6 +143,8 @@ contract VirtualTAO is
         require(amountToMintEvmDecimals > 0, "vTAO: amount to mint is zero");
         // Mint the vTAO
         _mint(to, amountToMintEvmDecimals);
+
+        emit TAOStaked(msg.sender, to, amountEvm, amountToMintEvmDecimals);
     }
 
     function unstake(uint256 amountEvm) public nonReentrant {
@@ -185,6 +200,8 @@ contract VirtualTAO is
         _burn(from, amountEvm);
         // Transfer the actual amount of TAO from our contract
         _safeTransferTAO(from, amountToSend);
+
+        emit TAOUnstaked(msg.sender, from, amountEvm, amountToSend);
     }
 
     function _safeUnstake(
