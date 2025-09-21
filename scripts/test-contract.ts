@@ -28,7 +28,7 @@ async function main() {
   const totalSupply = await contract.totalSupply();
   console.log("Total supply:", totalSupply);
 
-  const toStake = 0.01;
+  const toStake = 1.0;
   const toStakeAsBigInt = ethers.parseUnits(toStake.toFixed(DECIMALS), DECIMALS);
 
   const options = {value: toStakeAsBigInt}

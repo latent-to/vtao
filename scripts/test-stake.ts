@@ -5,7 +5,7 @@ import { IStakingV2ABI, ISTAKING_V2_ADDRESS } from "./interfaces/staking";
 
 const DECIMALS = 18;
 
-const NETUID = 1;
+const NETUID = 0;
 
 async function main() {
   // Get deployed address
@@ -24,7 +24,7 @@ async function main() {
   const toStakeAsBigInt = ethers.parseUnits(toStake.toFixed(DECIMALS), DECIMALS);
   const hotkey = "0x20b0f8ac1d5416d32f5a552f98b570f06e8392ccb803029e04f63fbe0553c954";
   // 0x51A804Ae94029e3401D3985Bd63606c7bC05DeAA --> H160 as pubkey
-  const coldkey = "0x2a41b3d9ccc7fbbda5453b601d22fff585714003f271885f3ab79e62c95172ff"; 
+  const coldkey = "0xdb0a0892e30306909e4ccc52d4a2398d0325490b77c71166f78585f386549a79"; 
 
   const options = {value: 0}
   const tx = await contract.addStake(hotkey, toStake, NETUID);

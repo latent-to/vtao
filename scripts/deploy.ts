@@ -4,7 +4,7 @@ import fs from "fs";
 async function main() {
 
   const vTAO = await ethers.getContractFactory("VirtualTAO"); // Has access to private fields
-  const [owner, otherAccount, thirdAccount] = await ethers.getSigners();
+  const [owner] = await ethers.getSigners();
   const vTAOContract = await upgrades.deployProxy(vTAO, [owner.address], { initializer: 'initialize' });
   await vTAOContract.waitForDeployment();
 

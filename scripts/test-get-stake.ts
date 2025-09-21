@@ -25,7 +25,7 @@ async function main() {
   const vTAOContract = new ethers.Contract(c_address, c_abi, signer);
 
   const hotkey = "0x20b0f8ac1d5416d32f5a552f98b570f06e8392ccb803029e04f63fbe0553c954";
-  const coldkey = "0xc3027b33125d032eb377cdbe408d35a8466d8510936824b40b7bf56bee26ba05"; // c_address
+  const coldkey = "0xaed7ab0caa1e1865d37cb4ecb53f6f0b3e0752553a0356d402d3869fe6226da6"; // c_address
   const netuid = 0;
 
   const curr_stake = await contract.getStake(hotkey, coldkey, netuid);
