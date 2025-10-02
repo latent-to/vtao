@@ -140,7 +140,7 @@ const channelSecuritySettings: [string[], [string[], number]] = [
     // Mandatory DVN names
     ['LayerZero Labs' /* <our DVN> ← add more DVN names here */],
     // Optional DVN names, threshold
-    [['Canary', 'Deutsche Telekom', 'Nethermind', 'P2P'], 2],
+    [['Deutsche Telekom', 'Nethermind', 'P2P'], 2],
 ]
 
 // With the config generator, pathways declared are automatically bidirectional
