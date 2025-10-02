@@ -28,7 +28,37 @@ const hardhatConfig: HardhatUserConfig = {
     localnet: {
       url: "http://127.0.0.1:9945",
       accounts: [config.ethPrivateKey, config.ethPrivateKey1]
+    },
+    taostats: {
+      url: 'https://evm.taostats.io/api/eth-rpc'
+    },
+    'subtensor-evm': {
+      url: 'https://evm.tao.app/api/eth-rpc'
     }
+  },
+  etherscan: {
+    apiKey: {
+      'taostats': 'empty',
+      'subtensor-evm': 'empty'
+    },
+    customChains: [
+      {
+        network: "taostats",
+        chainId: 964,
+        urls: {
+          apiURL: "https://evm.taostats.io/api",
+          browserURL: "https://evm.taostats.io"
+        },
+      },
+      {
+          network: "subtensor-evm",
+          chainId: 964,
+          urls: {
+            apiURL: "https://evm.tao.app/api",
+            browserURL: "https://evm.tao.app"
+          }
+      }
+    ]
   },
   mocha: {
     timeout: 300000
