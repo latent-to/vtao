@@ -157,6 +157,12 @@ const config: HardhatUserConfig = {
             accounts,
         },
 
+        'tron-mainnet': {
+            eid: EndpointId.TRON_V2_MAINNET,
+            url: process.env.RPC_URL_TRON_MAINNET || 'https://rpc.tron.network',
+            accounts,
+        },
+
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
             allowUnlimitedContractSize: true,

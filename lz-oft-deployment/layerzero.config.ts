@@ -1,9 +1,18 @@
 import { EndpointId } from '@layerzerolabs/lz-definitions'
 import { ExecutorOptionType } from '@layerzerolabs/lz-v2-utilities'
-import { TwoWayConfig, generateConnectionsConfig } from '@layerzerolabs/metadata-tools'
+import {
+    BlockConfirmationsDefinition,
+    DVNsToAddresses,
+    IMetadata,
+    TwoWayConfig,
+    defaultFetchMetadata,
+    generateConnectionsConfig,
+} from '@layerzerolabs/metadata-tools'
 import { OAppEnforcedOption } from '@layerzerolabs/toolbox-hardhat'
 
-import type { OmniPointHardhat } from '@layerzerolabs/toolbox-hardhat'
+import generatedConfig from './layerzero.config.generated'
+
+import type { OmniPointHardhat, Uln302UlnUserConfig } from '@layerzerolabs/toolbox-hardhat'
 
 /**
  *  WARNING: ONLY 1 OFTAdapter should exist for a given global mesh.
@@ -111,8 +120,20 @@ const polygonContract: OmniPointHardhat = {
     contractName: 'vTAOOFT',
 }
 
-// To connect all the above chains to each other, we need the following pathways:
-// Optimism <-> Arbitrum
+const tronContract: OmniPointHardhat = {
+    eid: EndpointId.TRON_V2_MAINNET,
+    contractName: 'vTAOOFT',
+}
+
+const tonContract: OmniPointHardhat = {
+    eid: EndpointId.TON_V2_MAINNET,
+    address: '',
+}
+
+const solanaContract: OmniPointHardhat = {
+    eid: EndpointId.SOLANA_V2_MAINNET,
+    address: '',
+}
 
 // For this example's simplicity, we will use the same enforced options values for sending to all chains
 // For production, you should ensure `gas` is set to the correct value through profiling the gas usage of calling OFT._lzReceive(...) on the destination chain
@@ -126,305 +147,160 @@ const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [
     },
 ]
 
-const EVM_ENFORCED_OPTIONS_ARB_DESTINATION: OAppEnforcedOption[] = [
-    {
-        msgType: 1,
-        optionType: ExecutorOptionType.LZ_RECEIVE,
-        gas: 80_000, // Higher gas for Arbitrum destination
-        value: 0,
-    },
-]
-
-// [ requiredDVN[], [ optionalDVN[], threshold ] ]
 const channelSecuritySettings: [string[], [string[], number]] = [
     // Mandatory DVN names
     ['LayerZero Labs' /* <our DVN> ← add more DVN names here */],
     // Optional DVN names, threshold
-    [['Deutsche Telekom', 'Nethermind', 'P2P'], 2],
+    [[], 0],
 ]
+
+const polygonConfs: BlockConfirmationsDefinition = 512
+const arbConfs: BlockConfirmationsDefinition = 20
+const baseConfs: BlockConfirmationsDefinition = 10
+const beraConfs: BlockConfirmationsDefinition = 20
+const bscConfs: BlockConfirmationsDefinition = 20
+const ethConfs: BlockConfirmationsDefinition = 15
+const gnosisConfs: BlockConfirmationsDefinition = 5
+const opConfs: BlockConfirmationsDefinition = 20
+const tronConfs: BlockConfirmationsDefinition = 5
+const subevmConfs: BlockConfirmationsDefinition = 10
 
 // With the config generator, pathways declared are automatically bidirectional
 // i.e. if you declare A,B there's no need to declare B,A
-const pathways: TwoWayConfig[] = [
-    // === Arbitrum <-> All ===
+const pathways: TwoWayConfig[] = generatedConfig.contracts.map((contract) => [
+    tronContract,
+    contract.contract,
+    channelSecuritySettings,
     [
-        arbitrumContract, // Chain A contract
-        baseContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS_ARB_DESTINATION], // Chain B enforcedOptions, Chain A enforcedOptions
+        tronConfs, // Use confirmations as found in the generated config
+        generatedConfig.connections.find((c) => c.to.eid === contract.contract.eid)?.config?.receiveConfig?.ulnConfig
+            ?.confirmations || 10,
     ],
-    [
-        arbitrumContract, // Chain A contract
-        beraContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS_ARB_DESTINATION], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        arbitrumContract, // Chain A contract
-        bscContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS_ARB_DESTINATION], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        arbitrumContract, // Chain A contract
-        ethContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS_ARB_DESTINATION], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        arbitrumContract, // Chain A contract
-        gnosisContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS_ARB_DESTINATION], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        arbitrumContract, // Chain A contract
-        optimismContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS_ARB_DESTINATION], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        arbitrumContract, // Chain A contract
-        polygonContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS_ARB_DESTINATION], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    // === Base <-> All ===
-    [
-        baseContract, // Chain A contract
-        beraContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        baseContract, // Chain A contract
-        bscContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        baseContract, // Chain A contract
-        ethContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        baseContract, // Chain A contract
-        gnosisContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        baseContract, // Chain A contract
-        optimismContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        baseContract, // Chain A contract
-        polygonContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    // === Bera <-> All ===
-    [
-        beraContract, // Chain A contract
-        bscContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        beraContract, // Chain A contract
-        ethContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        beraContract, // Chain A contract
-        gnosisContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        beraContract, // Chain A contract
-        optimismContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        beraContract, // Chain A contract
-        polygonContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    // === Ethereum <-> All ===
-    [
-        ethContract, // Chain A contract
-        bscContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        ethContract, // Chain A contract
-        gnosisContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        ethContract, // Chain A contract
-        optimismContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        ethContract, // Chain A contract
-        polygonContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    // === Gnosis <-> All ===
-    [
-        gnosisContract, // Chain A contract
-        bscContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        gnosisContract, // Chain A contract
-        optimismContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        gnosisContract, // Chain A contract
-        polygonContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    // === Optimism <-> All ===
-    [
-        optimismContract, // Chain A contract
-        bscContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        optimismContract, // Chain A contract
-        polygonContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    // === Polygon <-> All ===
-    [
-        polygonContract, // Chain A contract
-        bscContract, // Chain B contract
-        channelSecuritySettings,
-        [1, 1], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    // === BSC <-> All ===
-    // Already connected to Arbitrum, Base, Bera, Ethereum, Gnosis, Optimism
-    // === SubEVM <-> All ===
-    [
-        arbitrumContract, // Chain A contract
-        subevmmainnetContract, // Chain B contract
-        channelSecuritySettings,
-        [2, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        baseContract, // Chain A contract
-        subevmmainnetContract, // Chain B contract
-        channelSecuritySettings,
-        [2, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        beraContract, // Chain A contract
-        subevmmainnetContract, // Chain B contract
-        channelSecuritySettings,
-        [2, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        bscContract, // Chain A contract
-        subevmmainnetContract, // Chain B contract
-        channelSecuritySettings,
-        [2, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        ethContract, // Chain A contract
-        subevmmainnetContract, // Chain B contract
-        channelSecuritySettings,
-        [2, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        gnosisContract, // Chain A contract
-        subevmmainnetContract, // Chain B contract
-        channelSecuritySettings,
-        [2, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        optimismContract, // Chain A contract
-        subevmmainnetContract, // Chain B contract
-        channelSecuritySettings,
-        [2, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
-    [
-        polygonContract, // Chain A contract
-        subevmmainnetContract, // Chain B contract
-        channelSecuritySettings,
-        [2, 2], // [A to B confirmations, B to A confirmations]
-        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
-    ],
+    [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
+])
+
+function getEndpointIdDeployment(eid: EndpointId, metadata: IMetadata) {
+    const srcEidString = eid.toString()
+    for (const entry of Object.values(metadata)) {
+        if (entry.deployments) {
+            for (const deployment of entry.deployments) {
+                if (srcEidString === deployment.eid) {
+                    return deployment
+                }
+            }
+        }
+    }
+}
+
+const optionalDVNsByPreference: string[] = [
+    'LayerZero Labs',
+    'Stargate',
+    'USDT0',
+    'BitGo',
+    'Google Cloud',
+    'Deutsche Telekom',
+    'Horizen',
+    'P2P',
 ]
+
+function getOptionalDVNs(
+    chainKey: string,
+    metadata: IMetadata,
+    requiredDVNs: string[],
+    maxOptionalDVNs: number
+): string[] {
+    const optionalDVNsAsAddresses: string[] = optionalDVNsByPreference.reduce((acc, dvn) => {
+        if (acc.length >= maxOptionalDVNs) {
+            return acc
+        }
+        try {
+            const dvnAddress = DVNsToAddresses([dvn], chainKey, metadata)[0]
+            if (!requiredDVNs.includes(dvnAddress)) {
+                return [...acc, dvnAddress]
+            }
+            return acc
+        } catch (error) {
+            if (error instanceof Error && error.message.includes("Can't find DVN:")) {
+                return acc
+            }
+            throw error
+        }
+    }, [] as string[])
+
+    return optionalDVNsAsAddresses
+}
+
+function getNewOptionalDVNs(eid: EndpointId, ulnConfig: Uln302UlnUserConfig, metadata: IMetadata): [string[], number] {
+    const endpointIdDeployment = getEndpointIdDeployment(eid, metadata)
+    if (!endpointIdDeployment) {
+        return [[], 0]
+    }
+
+    const requiredDVNs = ulnConfig.requiredDVNs
+
+    // add some optional DVNs, at most 2
+    const optionalDVNsNew: string[] = getOptionalDVNs(endpointIdDeployment.chainKey, metadata, requiredDVNs, 2)
+
+    // threshold of at least 1, at most length - 1, or 0 if length is 0
+    const optionalDVNThresholdNew = Math.max(Math.min(optionalDVNsNew.length - 1, 0), optionalDVNsNew.length)
+
+    return [optionalDVNsNew, optionalDVNThresholdNew]
+}
 
 export default async function () {
     // Generate the connections config based on the pathways
-    const connections = await generateConnectionsConfig(pathways)
+    const metadata = await defaultFetchMetadata()
+    const connections = await generateConnectionsConfig([]) //pathways)
+
+    const generatedConnections = generatedConfig.connections
+        .filter((connection) => connection.config !== undefined)
+        .filter((connection) => {
+            // remove connections that are already in the connections array
+            return !connections.find((c) => c.from.eid === connection.from.eid && c.to.eid === connection.to.eid)
+        })
+
+    const newConnections = [...generatedConnections, ...connections].map((connection) => {
+        if (connection.config === undefined) {
+            return connection
+        }
+
+        // Add optional DVNs to the connections, preferring the existing optional DVNs
+
+        // Optional DVNs for Receive
+        if (connection.config.receiveConfig?.ulnConfig?.optionalDVNs?.length == 0) {
+            // get new optional DVNs
+            const [optionalDVNsNew, optionalDVNThresholdNew] = getNewOptionalDVNs(
+                connection.from.eid,
+                connection.config.receiveConfig.ulnConfig,
+                metadata
+            )
+            connection.config.receiveConfig.ulnConfig.optionalDVNs = optionalDVNsNew
+            connection.config.receiveConfig.ulnConfig.optionalDVNThreshold = optionalDVNThresholdNew
+        }
+
+        // Optional DVNs for Send
+        if (connection.config.sendConfig?.ulnConfig?.optionalDVNs?.length == 0) {
+            // get new optional DVNs
+            const [optionalDVNsNew, optionalDVNThresholdNew] = getNewOptionalDVNs(
+                connection.from.eid,
+                connection.config.sendConfig.ulnConfig,
+                metadata
+            )
+            connection.config.sendConfig.ulnConfig.optionalDVNs = optionalDVNsNew
+            connection.config.sendConfig.ulnConfig.optionalDVNThreshold = optionalDVNThresholdNew
+        }
+
+        return connection
+    })
+
     return {
         contracts: [
-            { contract: subevmmainnetContract },
-            { contract: arbitrumContract },
-            { contract: optimismContract },
-            { contract: baseContract },
-            { contract: beraContract },
-            { contract: ethContract },
-            { contract: gnosisContract },
-            { contract: polygonContract },
-            { contract: bscContract },
+            ...generatedConfig.contracts,
+            //{ contract: tronContract },
+
+            // { contract: tonContract },
+            // { contract: solanaContract },
         ],
-        connections,
+        connections: newConnections,
     }
 }
