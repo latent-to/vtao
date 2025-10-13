@@ -203,6 +203,31 @@ const optionalDVNsByPreference: string[] = [
     'P2P',
 ]
 
+function AddressToDvn(address: string, eid: EndpointId, metadata: IMetadata): string {
+    const addressAsLowercase = address.toLowerCase()
+    const endpointIdDeployment = getEndpointIdDeployment(eid, metadata)
+    if (!endpointIdDeployment) {
+        throw new Error(`Can't find endpointIdDeployment for eid: "${eid}".`)
+    }
+    const chainKey = endpointIdDeployment.chainKey
+
+    if (!metadata[chainKey].dvns) {
+        throw new Error(`Can't find DVNs for chainKey: "${chainKey}".`)
+    }
+    if (!metadata[chainKey].dvns[addressAsLowercase]) {
+        throw new Error(`Can't find DVN for address: "${address}" on chainKey: "${chainKey}".`)
+    }
+
+    return metadata[chainKey].dvns[addressAsLowercase].canonicalName
+}
+
+function setsEqual(set1: Set<string>, set2: Set<string>): boolean {
+    if (set1.size !== set2.size) {
+        return false
+    }
+    return Array.from(set1).every((dvn) => set2.has(dvn)) && Array.from(set2).every((dvn) => set1.has(dvn))
+}
+
 function getOptionalDVNs(
     chainKey: string,
     metadata: IMetadata,
@@ -259,39 +284,150 @@ export default async function () {
             return !connections.find((c) => c.from.eid === connection.from.eid && c.to.eid === connection.to.eid)
         })
 
-    const newConnections = [...generatedConnections, ...connections].map((connection) => {
-        if (connection.config === undefined) {
-            return connection
-        }
+    const visited = new Set<string>()
 
-        // Add optional DVNs to the connections, preferring the existing optional DVNs
+    console.log('Checking connections')
+    for (const connection of generatedConnections) {
+        try {
+            if (connection.config === undefined) {
+                throw new Error(`Connection config ${connection.from.eid} -> ${connection.to.eid} is undefined`)
+            }
+            // sort the eids to ensure consistent key
+            const visitedKey = [connection.from.eid, connection.to.eid].sort().join('-')
 
-        // Optional DVNs for Receive
-        if (connection.config.receiveConfig?.ulnConfig?.optionalDVNs?.length == 0) {
-            // get new optional DVNs
-            const [optionalDVNsNew, optionalDVNThresholdNew] = getNewOptionalDVNs(
-                connection.from.eid,
-                connection.config.receiveConfig.ulnConfig,
-                metadata
+            if (visited.has(visitedKey)) {
+                continue
+            }
+            visited.add(visitedKey)
+            console.log(`Checking connection ${connection.from.eid} <-> ${connection.to.eid}`)
+            console.log('--------------------------------')
+
+            // find reverse-route
+            const reverseRoute = generatedConnections.find(
+                (c) => c.from.eid === connection.to.eid && c.to.eid === connection.from.eid
             )
-            connection.config.receiveConfig.ulnConfig.optionalDVNs = optionalDVNsNew
-            connection.config.receiveConfig.ulnConfig.optionalDVNThreshold = optionalDVNThresholdNew
-        }
+            if (reverseRoute === undefined) {
+                throw new Error(`Reverse route ${connection.to.eid} -> ${connection.from.eid} not found`)
+            }
+            if (reverseRoute.config === undefined) {
+                throw new Error(`Reverse route config ${connection.from.eid} -> ${connection.to.eid} is undefined`)
+            }
 
-        // Optional DVNs for Send
-        if (connection.config.sendConfig?.ulnConfig?.optionalDVNs?.length == 0) {
-            // get new optional DVNs
-            const [optionalDVNsNew, optionalDVNThresholdNew] = getNewOptionalDVNs(
-                connection.from.eid,
-                connection.config.sendConfig.ulnConfig,
-                metadata
+            // check that the reverse route has a matching config
+            const fwdSendConfig = connection.config.sendConfig?.ulnConfig
+            const revSendConfig = reverseRoute.config.sendConfig?.ulnConfig
+            if (!fwdSendConfig) {
+                throw new Error(`Send config ${connection.from.eid} -> ${connection.to.eid} is undefined`)
+            }
+            if (!revSendConfig) {
+                throw new Error(`Send config ${connection.to.eid} -> ${connection.from.eid} is undefined`)
+            }
+
+            const fwdReceiveConfig = connection.config.receiveConfig?.ulnConfig
+            const revReceiveConfig = reverseRoute.config.receiveConfig?.ulnConfig
+            if (!fwdReceiveConfig) {
+                throw new Error(`Receive config ${connection.from.eid} -> ${connection.to.eid} is undefined`)
+            }
+            if (!revReceiveConfig) {
+                throw new Error(`Receive config ${connection.to.eid} -> ${connection.from.eid} is undefined`)
+            }
+
+            // check that the send configs are equal
+            if (fwdSendConfig.optionalDVNThreshold !== revReceiveConfig.optionalDVNThreshold) {
+                throw new Error(
+                    `Optional DVN threshold ${connection.from.eid} -> ${connection.to.eid} does not match ${connection.to.eid} -> ${connection.from.eid}`
+                )
+            }
+            if (fwdSendConfig.optionalDVNs?.length !== revReceiveConfig.optionalDVNs?.length) {
+                throw new Error(
+                    `Optional DVN length ${connection.from.eid} -> ${connection.to.eid} does not match ${connection.to.eid} -> ${connection.from.eid}`
+                )
+            }
+            if (fwdSendConfig.requiredDVNs?.length !== revReceiveConfig.requiredDVNs?.length) {
+                throw new Error(
+                    `Required DVN length ${connection.from.eid} -> ${connection.to.eid} does not match ${connection.to.eid} -> ${connection.from.eid}`
+                )
+            }
+
+            if (revSendConfig.optionalDVNThreshold !== fwdReceiveConfig.optionalDVNThreshold) {
+                throw new Error(
+                    `Optional DVN threshold ${connection.to.eid} -> ${connection.from.eid} does not match ${connection.from.eid} -> ${connection.to.eid}`
+                )
+            }
+            if (revSendConfig.optionalDVNs?.length !== fwdReceiveConfig.optionalDVNs?.length) {
+                throw new Error(
+                    `Optional DVN length ${connection.to.eid} -> ${connection.from.eid} does not match ${connection.from.eid} -> ${connection.to.eid}`
+                )
+            }
+            if (revSendConfig.requiredDVNs?.length !== fwdReceiveConfig.requiredDVNs?.length) {
+                throw new Error(
+                    `Required DVN length ${connection.to.eid} -> ${connection.from.eid} does not match ${connection.from.eid} -> ${connection.to.eid}`
+                )
+            }
+
+            // Check the actual DVNs
+            const fwdSendRequiredDVNs = new Set(
+                fwdSendConfig.requiredDVNs.map((dvn) => AddressToDvn(dvn, connection.from.eid, metadata))
             )
-            connection.config.sendConfig.ulnConfig.optionalDVNs = optionalDVNsNew
-            connection.config.sendConfig.ulnConfig.optionalDVNThreshold = optionalDVNThresholdNew
-        }
+            const revReceiveRequiredDVNs = new Set(
+                revReceiveConfig.requiredDVNs.map((dvn) => AddressToDvn(dvn, connection.to.eid, metadata))
+            )
 
-        return connection
-    })
+            if (!setsEqual(fwdSendRequiredDVNs, revReceiveRequiredDVNs)) {
+                throw new Error(
+                    `Required DVNs on ${connection.from.eid} -> ${connection.to.eid} do not match ${connection.to.eid} -> ${connection.from.eid}`
+                )
+            }
+
+            // Check the optional DVNs
+            const fwdSendOptionalDVNs = new Set(
+                fwdSendConfig.optionalDVNs?.map((dvn) => AddressToDvn(dvn, connection.from.eid, metadata)) ?? []
+            )
+            const revReceiveOptionalDVNs = new Set(
+                revReceiveConfig.optionalDVNs?.map((dvn) => AddressToDvn(dvn, connection.to.eid, metadata)) ?? []
+            )
+
+            if (!setsEqual(fwdSendOptionalDVNs, revReceiveOptionalDVNs)) {
+                throw new Error(
+                    `Optional DVNs on ${connection.from.eid} -> ${connection.to.eid} do not match ${connection.to.eid} -> ${connection.from.eid}`
+                )
+            }
+
+            // Check other direction
+            const revSendRequiredDVNs = new Set(
+                revSendConfig.requiredDVNs.map((dvn) => AddressToDvn(dvn, connection.to.eid, metadata))
+            )
+            const fwdReceiveRequiredDVNs = new Set(
+                fwdReceiveConfig.requiredDVNs.map((dvn) => AddressToDvn(dvn, connection.from.eid, metadata))
+            )
+            if (!setsEqual(revSendRequiredDVNs, fwdReceiveRequiredDVNs)) {
+                throw new Error(
+                    `Required DVNs on ${connection.to.eid} -> ${connection.from.eid} do not match ${connection.from.eid} -> ${connection.to.eid}`
+                )
+            }
+
+            const revSendOptionalDVNs = new Set(
+                revSendConfig.optionalDVNs?.map((dvn) => AddressToDvn(dvn, connection.to.eid, metadata)) ?? []
+            )
+            const fwdReceiveOptionalDVNs = new Set(
+                fwdReceiveConfig.optionalDVNs?.map((dvn) => AddressToDvn(dvn, connection.from.eid, metadata)) ?? []
+            )
+            if (!setsEqual(revSendOptionalDVNs, fwdReceiveOptionalDVNs)) {
+                throw new Error(
+                    `Optional DVNs on ${connection.to.eid} -> ${connection.from.eid} do not match ${connection.from.eid} -> ${connection.to.eid}`
+                )
+            }
+        } catch (error) {
+            console.error(`Error checking connection ${connection.from.eid} <-> ${connection.to.eid}`)
+            const eidFromAsDeployment = getEndpointIdDeployment(connection.from.eid, metadata)
+            const eidToAsDeployment = getEndpointIdDeployment(connection.to.eid, metadata)
+
+            console.error(`${eidFromAsDeployment?.chainKey} <-> ${eidToAsDeployment?.chainKey}`)
+            throw error
+        }
+    }
+    console.log('Connections checked')
+    const newConnections = [...generatedConnections, ...connections].filter((connection) => connection !== undefined)
 
     return {
         contracts: [
