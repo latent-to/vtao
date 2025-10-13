@@ -104,7 +104,7 @@ const generatedConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: [
                             '0x2f55C492897526677C5B68fb199ea31E2c126416', // LZ
-                            '0xa7b5189bcA84Cd304D8553977c7C614329750d99', // nethermind
+                            '0xeae839784e5f6c79bbaf34b6023a2f62e134ab39', // nethermind
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -115,7 +115,7 @@ const generatedConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: [
                             '0x2f55C492897526677C5B68fb199ea31E2c126416',
-                            '0xa7b5189bcA84Cd304D8553977c7C614329750d99',
+                            '0xeae839784e5f6c79bbaf34b6023a2f62e134ab39',
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -600,17 +600,23 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: ['0x0273fbff931704884668a9efe50e7a2b3fc30505'],
-                        optionalDVNThreshold: 1,
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4', // LZ
+                            '0x0273fbff931704884668a9efe50e7a2b3fc30505', // Deutsche Telekom
+                        ],
+                        optionalDVNs: [],
+                        optionalDVNThreshold: 0,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: ['0x0273fbff931704884668a9efe50e7a2b3fc30505'],
-                        optionalDVNThreshold: 1,
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4',
+                            '0x0273fbff931704884668a9efe50e7a2b3fc30505',
+                        ],
+                        optionalDVNs: [],
+                        optionalDVNThreshold: 0,
                     },
                 },
             },
@@ -662,7 +668,10 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4', // LZ
+                            '0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b', // Nethermind
+                        ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -670,7 +679,10 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4', // LZ
+                            '0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b', // Nethermind
+                        ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -725,16 +737,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(5),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -786,7 +798,10 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4', // LZ
+                            '0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b', // Nethermind
+                        ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -794,7 +809,10 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(512),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4',
+                            '0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b',
+                        ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -815,16 +833,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -911,8 +929,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: [
-                            '0x31F748a368a893Bdb5aBB67ec95F232507601A73',
-                            '0xfD6865c841c2d64565562fCc7e05e619A30615f0',
+                            '0x31F748a368a893Bdb5aBB67ec95F232507601A73', // Nethermind
+                            '0xfD6865c841c2d64565562fCc7e05e619A30615f0', // LZ
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -1143,8 +1161,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(15),
                         requiredDVNs: [
-                            '0x589dEDbD617e0CBcB916A9223F4d1300c294236b',
-                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc',
+                            '0x589dEDbD617e0CBcB916A9223F4d1300c294236b', // LZ
+                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc', // Gcloud
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -1347,16 +1365,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(15),
                         requiredDVNs: ['0x589dedbd617e0cbcb916a9223f4d1300c294236b'], // lz
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xa59ba433ac34d2927232918ef5b2eaafcf130ba5'], // nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x589dedbd617e0cbcb916a9223f4d1300c294236b'], // lz
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xa59ba433ac34d2927232918ef5b2eaafcf130ba5'], // nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -1375,8 +1393,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(5),
                         requiredDVNs: [
-                            '0x11bb2991882a86Dc3E38858d922559A385d506bA',
-                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc',
+                            '0x11bb2991882a86Dc3E38858d922559A385d506bA', // LZ
+                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc', // Gcloud
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -1442,17 +1460,17 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x38340337f9ADF5D76029Ab3A667d34E5a032F7BA' },
                     ulnConfig: {
                         confirmations: BigInt(5),
-                        requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'], // LZ
+                        optionalDVNs: ['0x7fe673201724925b5c477d4e1a4bd3e954688cf5'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x7fe673201724925b5c477d4e1a4bd3e954688cf5'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -1607,16 +1625,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(5),
                         requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x7fe673201724925b5c477d4e1a4bd3e954688cf5'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x7fe673201724925b5c477d4e1a4bd3e954688cf5'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -1839,8 +1857,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: [
-                            '0x6A02D83e8d433304bba74EF1c427913958187142',
-                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc',
+                            '0x6A02D83e8d433304bba74EF1c427913958187142', // LZ
+                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc', // Gcloud
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -1873,16 +1891,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: ['0x6a02d83e8d433304bba74ef1c427913958187142'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xa7b5189bcA84Cd304D8553977c7C614329750d99'], // nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x6a02d83e8d433304bba74ef1c427913958187142'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xa7b5189bcA84Cd304D8553977c7C614329750d99'], // nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -1969,8 +1987,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(512),
                         requiredDVNs: [
-                            '0x23DE2FE932d9043291f870324B74F820e11dc81A',
-                            '0x31F748a368a893Bdb5aBB67ec95F232507601A73',
+                            '0x23DE2FE932d9043291f870324B74F820e11dc81A', // LZ
+                            '0x31F748a368a893Bdb5aBB67ec95F232507601A73', // Nethermind
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -1980,8 +1998,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: [
-                            '0x23DE2FE932d9043291f870324B74F820e11dc81A',
-                            '0x31F748a368a893Bdb5aBB67ec95F232507601A73',
+                            '0x23DE2FE932d9043291f870324B74F820e11dc81A', // LZ
+                            '0x31F748a368a893Bdb5aBB67ec95F232507601A73', // Nethermind
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -2138,17 +2156,17 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0xCd3F213AD101472e1713C72B1697E727C803885b' },
                     ulnConfig: {
                         confirmations: BigInt(512),
-                        requiredDVNs: ['0x23de2fe932d9043291f870324b74f820e11dc81a'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: ['0x23de2fe932d9043291f870324b74f820e11dc81a'], // LZ
+                        optionalDVNs: ['0x31F748a368a893Bdb5aBB67ec95F232507601A73'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x23de2fe932d9043291f870324b74f820e11dc81a'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x31F748a368a893Bdb5aBB67ec95F232507601A73'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -2223,16 +2241,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'], // nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -2279,16 +2297,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(15),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -2307,16 +2325,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(5),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -2335,16 +2353,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -2363,16 +2381,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'], // Nethermind
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(512),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x8d77d35604a9f37f488e41d1d916b2a0088f82dd'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
