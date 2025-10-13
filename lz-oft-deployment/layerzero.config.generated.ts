@@ -69,8 +69,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: [
-                            '0x2f55C492897526677C5B68fb199ea31E2c126416',
-                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc',
+                            '0x2f55C492897526677C5B68fb199ea31E2c126416', // LZ
+                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc', // Gcloud
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -103,8 +103,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: [
-                            '0x2f55C492897526677C5B68fb199ea31E2c126416',
-                            '0xa7b5189bcA84Cd304D8553977c7C614329750d99',
+                            '0x2f55C492897526677C5B68fb199ea31E2c126416', // LZ
+                            '0xa7b5189bcA84Cd304D8553977c7C614329750d99', // nethermind
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -306,17 +306,17 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x31CAe3B7fB82d847621859fb1585353c5720660D' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x758C419533ad64Ce9D3413BC8d3A97B026098EC1'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: ['0x2f55c492897526677c5b68fb199ea31e2c126416'], // LZ
+                        optionalDVNs: ['0xeae839784e5f6c79bbaf34b6023a2f62e134ab39'], // D Telekom
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x758C419533ad64Ce9D3413BC8d3A97B026098EC1'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: ['0x2f55c492897526677c5b68fb199ea31e2c126416'],
+                        optionalDVNs: ['0xeae839784e5f6c79bbaf34b6023a2f62e134ab39'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -335,8 +335,8 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: [
-                            '0x9e059a54699a285714207b43B055483E78FAac25',
-                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc',
+                            '0x9e059a54699a285714207b43B055483E78FAac25', // LZ
+                            '0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc', // Gcloud
                         ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
@@ -372,8 +372,8 @@ const generatedConfig: {
                             '0x9e059a54699a285714207b43B055483E78FAac25',
                             '0xcd37CA043f8479064e10635020c65FfC005d36f6',
                         ],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xc2a0c36f5939a14966705c7cec813163faeea1f0'],
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
@@ -383,8 +383,8 @@ const generatedConfig: {
                             '0x9e059a54699a285714207b43B055483E78FAac25',
                             '0xcd37CA043f8479064e10635020c65FfC005d36f6',
                         ],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0xc2a0c36f5939a14966705c7cec813163faeea1f0'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -572,17 +572,17 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x2CCA08ae69E0C44b18a57Ab2A87644234dAebaE4' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x6498b0632f3834D7647367334838111c8C889703'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: ['0x9e059a54699a285714207b43b055483e78faac25'],
+                        optionalDVNs: ['0xc2a0c36f5939a14966705c7cec813163faeea1f0'],
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x6498b0632f3834D7647367334838111c8C889703'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: ['0x9e059a54699a285714207b43b055483e78faac25'],
+                        optionalDVNs: ['0xc2a0c36f5939a14966705c7cec813163faeea1f0'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -601,16 +601,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x0273fbff931704884668a9efe50e7a2b3fc30505'],
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x0273fbff931704884668a9efe50e7a2b3fc30505'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -628,17 +628,23 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4',
+                            '0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b',
+                        ],
+                        optionalDVNs: ['0x0273fbff931704884668a9efe50e7a2b3fc30505'],
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4',
+                            '0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b',
+                        ],
+                        optionalDVNs: ['0x0273fbff931704884668a9efe50e7a2b3fc30505'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -718,7 +724,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -808,7 +814,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -816,7 +822,7 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1074,7 +1080,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x3ebD570ed38B1b3b4BC886999fcF507e9D584859' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0xe9b5E4f9395a60799F4F608Ba3ABebDfC0ee6D9C'],
+                        requiredDVNs: ['0xfd6865c841c2d64565562fcc7e05e619a30615f0'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1082,7 +1088,7 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0xe9b5E4f9395a60799F4F608Ba3ABebDfC0ee6D9C'],
+                        requiredDVNs: ['0xfd6865c841c2d64565562fcc7e05e619a30615f0'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1340,7 +1346,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x173272739Bd7Aa6e4e214714048a9fE699453059' },
                     ulnConfig: {
                         confirmations: BigInt(15),
-                        requiredDVNs: ['0x747C741496a507E4B404b50463e691A8d692f6Ac'],
+                        requiredDVNs: ['0x589dedbd617e0cbcb916a9223f4d1300c294236b'], // lz
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1348,7 +1354,7 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x747C741496a507E4B404b50463e691A8d692f6Ac'],
+                        requiredDVNs: ['0x589dedbd617e0cbcb916a9223f4d1300c294236b'], // lz
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1436,7 +1442,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x38340337f9ADF5D76029Ab3A667d34E5a032F7BA' },
                     ulnConfig: {
                         confirmations: BigInt(5),
-                        requiredDVNs: ['0x8a893567f27893e6E0c7b6bba8769d9ab3E911Ff'],
+                        requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1444,7 +1450,7 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x8a893567f27893e6E0c7b6bba8769d9ab3E911Ff'],
+                        requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1600,7 +1606,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x38340337f9ADF5D76029Ab3A667d34E5a032F7BA' },
                     ulnConfig: {
                         confirmations: BigInt(5),
-                        requiredDVNs: ['0x8a893567f27893e6E0c7b6bba8769d9ab3E911Ff'],
+                        requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1608,7 +1614,7 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x8a893567f27893e6E0c7b6bba8769d9ab3E911Ff'],
+                        requiredDVNs: ['0x11bb2991882a86dc3e38858d922559a385d506ba'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1866,7 +1872,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x2D2ea0697bdbede3F01553D2Ae4B8d0c486B666e' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0xEbc3065003e67CaaC747836dA272d9E5271A37e1'],
+                        requiredDVNs: ['0x6a02d83e8d433304bba74ef1c427913958187142'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1874,7 +1880,7 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0xEbc3065003e67CaaC747836dA272d9E5271A37e1'],
+                        requiredDVNs: ['0x6a02d83e8d433304bba74ef1c427913958187142'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2132,7 +2138,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0xCd3F213AD101472e1713C72B1697E727C803885b' },
                     ulnConfig: {
                         confirmations: BigInt(512),
-                        requiredDVNs: ['0x43CFcc293CdF99F7D021F21FfD443f174AB0e843'],
+                        requiredDVNs: ['0x23de2fe932d9043291f870324b74f820e11dc81a'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2140,7 +2146,7 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x43CFcc293CdF99F7D021F21FfD443f174AB0e843'],
+                        requiredDVNs: ['0x23de2fe932d9043291f870324b74f820e11dc81a'],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2160,17 +2166,17 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
+                        optionalDVNs: ['0x58dff8622759ea75910a08dba5d060579271dcd7'], // D Telekom
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x58dff8622759ea75910a08dba5d060579271dcd7'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -2189,16 +2195,16 @@ const generatedConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x58dff8622759ea75910a08dba5d060579271dcd7'],
+                        optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
                         requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
-                        optionalDVNs: [],
-                        optionalDVNThreshold: 0,
+                        optionalDVNs: ['0x58dff8622759ea75910a08dba5d060579271dcd7'],
+                        optionalDVNThreshold: 1,
                     },
                 },
             },
@@ -2216,7 +2222,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2224,7 +2230,7 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2244,7 +2250,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2272,7 +2278,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2300,7 +2306,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2328,7 +2334,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2356,7 +2362,7 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
