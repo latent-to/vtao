@@ -18,3 +18,17 @@ ignition/deployments/chain-31337
 
 # Secrets
 config.ts
+
+# cache
+cache_forge
+
+# broadcast
+**/broadcast/**
+
+# openzeppelin
+.openzeppelin
+
+# vscode
+.vscode
+
+
