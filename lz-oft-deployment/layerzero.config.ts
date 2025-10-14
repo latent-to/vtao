@@ -1,3 +1,5 @@
+import fs from 'fs'
+
 import { EndpointId } from '@layerzerolabs/lz-definitions'
 import { ExecutorOptionType } from '@layerzerolabs/lz-v2-utilities'
 import {
@@ -135,6 +137,11 @@ const solanaContract: OmniPointHardhat = {
     address: '',
 }
 
+const avaxContract: OmniPointHardhat = {
+    eid: EndpointId.AVALANCHE_V2_MAINNET,
+    contractName: 'vTAOOFT',
+}
+
 // For this example's simplicity, we will use the same enforced options values for sending to all chains
 // For production, you should ensure `gas` is set to the correct value through profiling the gas usage of calling OFT._lzReceive(...) on the destination chain
 // To learn more, read https://docs.layerzero.network/v2/concepts/applications/oapp-standard#execution-options-and-enforced-settings
@@ -147,11 +154,11 @@ const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [
     },
 ]
 
-const channelSecuritySettings: [string[], [string[], number]] = [
+const channelSecuritySettings: [string[], [string[], number] | []] = [
     // Mandatory DVN names
     ['LayerZero Labs' /* <our DVN> ← add more DVN names here */],
     // Optional DVN names, threshold
-    [[], 0],
+    [],
 ]
 
 const polygonConfs: BlockConfirmationsDefinition = 512
@@ -167,14 +174,24 @@ const subevmConfs: BlockConfirmationsDefinition = 10
 
 // With the config generator, pathways declared are automatically bidirectional
 // i.e. if you declare A,B there's no need to declare B,A
-const pathways: TwoWayConfig[] = generatedConfig.contracts.map((contract) => [
+const pathwaysTron: TwoWayConfig[] = generatedConfig.contracts.map((contract) => [
     tronContract,
     contract.contract,
     channelSecuritySettings,
+    [tronConfs, 10],
+    [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
+])
+
+const pathwaysAvax: TwoWayConfig[] = generatedConfig.contracts.map((contract) => [
+    avaxContract,
+    contract.contract,
+    channelSecuritySettings,
     [
-        tronConfs, // Use confirmations as found in the generated config
-        generatedConfig.connections.find((c) => c.to.eid === contract.contract.eid)?.config?.receiveConfig?.ulnConfig
-            ?.confirmations || 10,
+        12,
+        Number(
+            generatedConfig.connections.find((c) => c.from.eid === contract.contract.eid)?.config?.sendConfig?.ulnConfig
+                ?.confirmations ?? 12
+        ),
     ],
     [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
 ])
@@ -229,7 +246,8 @@ function setsEqual(set1: Set<string>, set2: Set<string>): boolean {
 }
 
 function getOptionalDVNs(
-    chainKey: string,
+    srcChainKey: string,
+    destChainKey: string,
     metadata: IMetadata,
     requiredDVNs: string[],
     maxOptionalDVNs: number
@@ -239,11 +257,20 @@ function getOptionalDVNs(
             return acc
         }
         try {
-            const dvnAddress = DVNsToAddresses([dvn], chainKey, metadata)[0]
-            if (!requiredDVNs.includes(dvnAddress)) {
-                return [...acc, dvnAddress]
+            if (requiredDVNs.includes(dvn)) {
+                return acc
             }
-            return acc
+            // Check if the DVN is available on the destination chain
+            const srcDVN = DVNsToAddresses([dvn], srcChainKey, metadata)[0]
+            if (!srcDVN) {
+                return acc
+            }
+            const destDVN = DVNsToAddresses([dvn], destChainKey, metadata)[0]
+            if (!destDVN) {
+                return acc
+            }
+
+            return [...acc, dvn] // Add the DVN to the optional DVNs
         } catch (error) {
             if (error instanceof Error && error.message.includes("Can't find DVN:")) {
                 return acc
@@ -255,16 +282,26 @@ function getOptionalDVNs(
     return optionalDVNsAsAddresses
 }
 
-function getNewOptionalDVNs(eid: EndpointId, ulnConfig: Uln302UlnUserConfig, metadata: IMetadata): [string[], number] {
-    const endpointIdDeployment = getEndpointIdDeployment(eid, metadata)
-    if (!endpointIdDeployment) {
-        return [[], 0]
+function getNewOptionalDVNs(
+    srcEid: EndpointId,
+    destEid: EndpointId,
+    requiredDVNs: string[],
+    metadata: IMetadata
+): [string[], number] | undefined {
+    const srcEndpointIdDeployment = getEndpointIdDeployment(srcEid, metadata)
+    const destEndpointIdDeployment = getEndpointIdDeployment(destEid, metadata)
+    if (!srcEndpointIdDeployment || !destEndpointIdDeployment) {
+        return undefined
     }
 
-    const requiredDVNs = ulnConfig.requiredDVNs
-
     // add some optional DVNs, at most 2
-    const optionalDVNsNew: string[] = getOptionalDVNs(endpointIdDeployment.chainKey, metadata, requiredDVNs, 2)
+    const optionalDVNsNew: string[] = getOptionalDVNs(
+        srcEndpointIdDeployment.chainKey,
+        destEndpointIdDeployment.chainKey,
+        metadata,
+        requiredDVNs,
+        2
+    )
 
     // threshold of at least 1, at most length - 1, or 0 if length is 0
     const optionalDVNThresholdNew = Math.max(Math.min(optionalDVNsNew.length - 1, 0), optionalDVNsNew.length)
@@ -275,7 +312,28 @@ function getNewOptionalDVNs(eid: EndpointId, ulnConfig: Uln302UlnUserConfig, met
 export default async function () {
     // Generate the connections config based on the pathways
     const metadata = await defaultFetchMetadata()
-    const connections = await generateConnectionsConfig([]) //pathways)
+    const newPathways = [...pathwaysAvax].map((pathway) => {
+        console.log('pathway', pathway)
+        const [src, dest, channelSecuritySettings, blockConfirmations, enforcedOptions] = pathway
+        const [requiredDVNs, [optionalDVNs, optionalDVNThreshold]] = channelSecuritySettings
+        if (requiredDVNs.length == 0) {
+            throw new Error(`Required DVNs for ${src.eid} -> ${dest.eid} are empty`)
+        }
+        let newOptionalDVNs = optionalDVNs ?? []
+        let newOptionalDVNThreshold = optionalDVNThreshold ?? 0
+        if (optionalDVNs?.length == 0) {
+            const result = getNewOptionalDVNs(src.eid, dest.eid, requiredDVNs, metadata)
+            if (result === undefined) {
+                throw new Error(`New optional DVNs for ${src.eid} -> ${dest.eid} are undefined`)
+            }
+
+            ;[newOptionalDVNs, newOptionalDVNThreshold] = result
+            channelSecuritySettings[1] = [newOptionalDVNs, newOptionalDVNThreshold]
+        }
+        return [src, dest, channelSecuritySettings, blockConfirmations, enforcedOptions] as TwoWayConfig
+    })
+    console.log('added optional DVNs', newPathways)
+    const connections = await generateConnectionsConfig(newPathways)
 
     const generatedConnections = generatedConfig.connections
         .filter((connection) => connection.config !== undefined)
@@ -429,9 +487,20 @@ export default async function () {
     console.log('Connections checked')
     const newConnections = [...generatedConnections, ...connections].filter((connection) => connection !== undefined)
 
+    console.log('Using new connections', newConnections)
+    fs.writeFileSync(
+        'new-connections.json',
+        JSON.stringify(
+            newConnections,
+            (key, value) => (typeof value === 'bigint' || value instanceof BigInt ? value.toString() : value),
+            2
+        )
+    )
+
     return {
         contracts: [
             ...generatedConfig.contracts,
+            { contract: avaxContract },
             //{ contract: tronContract },
 
             // { contract: tonContract },
