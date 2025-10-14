@@ -96,6 +96,11 @@ const config: HardhatUserConfig = {
             url: process.env.RPC_URL_ARB_SEPOLIA || 'https://sepolia-rollup.arbitrum.io/rpc',
             accounts,
         },
+        'avalanche-mainnet': {
+            eid: EndpointId.AVALANCHE_V2_MAINNET,
+            url: 'https://1rpc.io/avax/c',
+            accounts,
+        },
         'ethereum-mainnet': {
             eid: EndpointId.ETHEREUM_V2_MAINNET,
             url: process.env.RPC_URL_ETHEREUM_MAINNET || 'https://eth.llamarpc.com',
@@ -110,11 +115,13 @@ const config: HardhatUserConfig = {
             eid: EndpointId.BSC_V2_MAINNET,
             url: process.env.RPC_URL_BSC_MAINNET || 'https://bsc.llamarpc.com',
             accounts,
+            gasPrice: 150_000_000, // 0.15 gwei - above minimum of 0.1 gwei (error showed min 100000000 wei)
         },
         'bsc-testnet': {
             eid: EndpointId.BSC_V2_TESTNET,
             url: process.env.RPC_URL_BSC_TESTNET || 'https://bnb-testnet.api.onfinality.io/public',
             accounts,
+            gasPrice: 150_000_000, // 0.15 gwei for testnet
         },
         'bera-mainnet': {
             eid: EndpointId.BERA_V2_MAINNET,
