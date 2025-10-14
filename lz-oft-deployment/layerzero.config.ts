@@ -185,7 +185,10 @@ const pathwaysTron: TwoWayConfig[] = generatedConfig.contracts.map((contract) =>
 const pathwaysAvax: TwoWayConfig[] = generatedConfig.contracts.map((contract) => [
     avaxContract,
     contract.contract,
-    channelSecuritySettings,
+    [
+        ['LayerZero Labs'], // mandatory DVN
+        [],
+    ],
     [
         12,
         Number(
@@ -313,7 +316,6 @@ export default async function () {
     // Generate the connections config based on the pathways
     const metadata = await defaultFetchMetadata()
     const newPathways = [...pathwaysAvax].map((pathway) => {
-        console.log('pathway', pathway)
         const [src, dest, channelSecuritySettings, blockConfirmations, enforcedOptions] = pathway
         const [requiredDVNs, [optionalDVNs, optionalDVNThreshold]] = channelSecuritySettings
         if (requiredDVNs.length == 0) {
@@ -321,7 +323,7 @@ export default async function () {
         }
         let newOptionalDVNs = optionalDVNs ?? []
         let newOptionalDVNThreshold = optionalDVNThreshold ?? 0
-        if (optionalDVNs?.length == 0) {
+        if (optionalDVNs?.length == 0 || optionalDVNs === undefined) {
             const result = getNewOptionalDVNs(src.eid, dest.eid, requiredDVNs, metadata)
             if (result === undefined) {
                 throw new Error(`New optional DVNs for ${src.eid} -> ${dest.eid} are undefined`)
