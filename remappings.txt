@@ -1,0 +1,8 @@
+@layerzerolabs/=node_modules/@layerzerolabs/
+base58-solidity/=node_modules/base58-solidity/
+eth-gas-reporter/=node_modules/eth-gas-reporter/
+forge-std/=lib/forge-std/src/
+hardhat/=node_modules/hardhat/
+solidity-bytes-utils/=node_modules/solidity-bytes-utils/
+@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/
+@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/

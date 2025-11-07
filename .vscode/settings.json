@@ -1,3 +1,18 @@
 {
-    "solidity.compileUsingRemoteVersion": "v0.8.24+commit.e11b9ed9"
+    "solidity.compileUsingRemoteVersion": "v0.8.24+commit.e11b9ed9",
+    "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
+    "solidity.packageDefaultDependenciesDirectory": ["node_modules", "lib"],
+    "solidity.formatter": "forge",
+    "[solidity]": {
+        "editor.defaultFormatter": "JuanBlanco.solidity"
+    },
+    "solidity.remappings": [
+        "@layerzerolabs/=node_modules/@layerzerolabs/",
+        "@openzeppelin/=node_modules/@openzeppelin/",
+        "base58-solidity/=node_modules/base58-solidity/",
+        "eth-gas-reporter/=node_modules/eth-gas-reporter/",
+        "forge-std/=lib/forge-std/src/",
+        "hardhat/=node_modules/hardhat/",
+        "solidity-bytes-utils/=node_modules/solidity-bytes-utils/"
+    ]
 }
