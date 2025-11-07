@@ -1,0 +1,42 @@
+[profile.default]
+src = 'contracts'
+out = 'out'
+libs = ['node_modules', 'lib']
+test = 'test'
+cache_path  = 'cache_forge'
+solc = "0.8.24+commit.e11b9ed9"
+remappings = [
+    "@layerzerolabs/=node_modules/@layerzerolabs/",
+    "base58-solidity/=node_modules/base58-solidity/",
+    "eth-gas-reporter/=node_modules/eth-gas-reporter/",
+    "forge-std/=lib/forge-std/src/",
+    "hardhat/=node_modules/hardhat/",
+    "solidity-bytes-utils/=node_modules/solidity-bytes-utils/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
+]
+evm_version = "london"
+
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+
+ffi = true
+ast = true
+build_info = true
+extra_output = ["storageLayout"]
+
+[rpc_endpoints]
+subtensor-evm = "${SUBTENSOREVM_RPC_URL}"
+sepolia = "${SEPOLIA_RPC_URL}"
+base-sepolia = "${BASE_SEPOLIA_RPC_URL}"
+arbitrum-one-sepolia = "${ARBITRUM_ONE_SEPOLIA_RPC_URL}"
+optimism-sepolia = "${OPTIMISM_SEPOLIA_RPC_URL}"
+polygon-mainnet = "${POLYGON_MAINNET_RPC_URL}"
+polygon-testnet = "${POLYGON_TESTNET_RPC_URL}"
+bera-mainnet = "${BERA_MAINNET_RPC_URL}"
+bera-testnet = "${BERA_TESTNET_RPC_URL}"
+bsc-mainnet = "${BSC_MAINNET_RPC_URL}"
+bsc-testnet = "${BSC_TESTNET_RPC_URL}"
+ethereum-mainnet = "${ETHEREUM_MAINNET_RPC_URL}"
+ethereum-sepolia = "${ETHEREUM_SEPOLIA_RPC_URL}"
