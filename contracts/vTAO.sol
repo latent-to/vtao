@@ -86,6 +86,14 @@ contract VirtualTAO is
         _address_as_pk = blake2bInstance.blake2b_256(input);
     }
 
+    function rootClaim() public {
+        _claimRoot();
+    }
+
+    function _claimRoot() internal {
+        IStaking(ISTAKING_ADDRESS).claimRootWithHotkey(_hotkey);
+    }
+
     function pause() public onlyOwner {
         _pause();
     }
