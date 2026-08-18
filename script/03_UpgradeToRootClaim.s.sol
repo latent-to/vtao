@@ -8,7 +8,7 @@ import {VirtualTAO} from "../contracts/vTAO.sol";
 /// @notice UUPS upgrade of the vTAO proxy to the VirtualTAO implementation at git HEAD.
 ///
 /// forge script script/03_UpgradeToRootClaim.s.sol:UpgradeToRootClaim \
-///   --rpc-url subevm \
+///   --rpc-url subtensor-evm \
 ///   --ledger \
 ///   --broadcast -vvvv
 contract UpgradeToRootClaim is Script {
@@ -24,7 +24,7 @@ contract UpgradeToRootClaim is Script {
         address payable proxy = payable(vm.envAddress("VTAO_ADDRESS"));
         console.log("Chain id:", block.chainid);
         console.log("Proxy:", proxy);
-        require(proxy.code.length > 0, "VTAO_ADDRESS has no code on this RPC; pass --rpc-url subevm");
+        require(proxy.code.length > 0, "VTAO_ADDRESS has no code on this RPC; pass --rpc-url subtensor-evm");
 
         VirtualTAO vTAO = VirtualTAO(proxy);
 
