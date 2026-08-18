@@ -1098,7 +1098,10 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x3ebD570ed38B1b3b4BC886999fcF507e9D584859' },
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0xfd6865c841c2d64565562fcc7e05e619a30615f0'],
+                        requiredDVNs: [
+                            '0x31f748a368a893bdb5abb67ec95f232507601a73',
+                            '0xfd6865c841c2d64565562fcc7e05e619a30615f0',
+                        ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -1106,7 +1109,10 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0xfd6865c841c2d64565562fcc7e05e619a30615f0'],
+                        requiredDVNs: [
+                            '0x31f748a368a893bdb5abb67ec95f232507601a73',
+                            '0xfd6865c841c2d64565562fcc7e05e619a30615f0',
+                        ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2268,7 +2274,10 @@ const generatedConfig: {
                     executorConfig: { maxMessageSize: 10000, executor: '0x4208D6E27538189bB48E603D6123A94b8Abe0A0b' },
                     ulnConfig: {
                         confirmations: BigInt(10),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'], // LZ
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4',
+                            '0x8d77d35604a9f37f488e41d1d916b2a0088f82dd',
+                        ], // LZ
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
@@ -2276,7 +2285,10 @@ const generatedConfig: {
                 receiveConfig: {
                     ulnConfig: {
                         confirmations: BigInt(20),
-                        requiredDVNs: ['0x282b3386571f7f794450d5789911a9804FA346b4'],
+                        requiredDVNs: [
+                            '0x282b3386571f7f794450d5789911a9804FA346b4',
+                            '0x8d77d35604a9f37f488e41d1d916b2a0088f82dd',
+                        ],
                         optionalDVNs: [],
                         optionalDVNThreshold: 0,
                     },
