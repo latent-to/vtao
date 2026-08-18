@@ -17,8 +17,8 @@
     "test:hardhat": "hardhat test"
   },
   "resolutions": {
-    "ethers": "^5.7.2",
-    "hardhat-deploy": "^0.12.1"
+    "hardhat-deploy": "^0.12.1",
+    "@nomicfoundation/hardhat-ledger/ethers": "6.14.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",
@@ -41,6 +41,7 @@
     "@layerzerolabs/toolbox-foundry": "~0.1.12",
     "@layerzerolabs/toolbox-hardhat": "~0.6.12",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-ledger": "^1.2.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@openzeppelin/contracts": "^5.0.2",
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
@@ -70,13 +71,15 @@
   },
   "pnpm": {
     "overrides": {
-      "ethers": "^5.7.2",
-      "hardhat-deploy": "^0.12.1"
+      "hardhat-deploy": "^0.12.1",
+      "@nomicfoundation/hardhat-ledger>ethers": "6.14.0"
     }
   },
   "overrides": {
-    "ethers": "^5.7.2",
-    "hardhat-deploy": "^0.12.1"
+    "hardhat-deploy": "^0.12.1",
+    "@nomicfoundation/hardhat-ledger": {
+      "ethers": "6.14.0"
+    }
   },
   "dependencies": {
     "@layerzerolabs/verify-contract": "^1.1.33"

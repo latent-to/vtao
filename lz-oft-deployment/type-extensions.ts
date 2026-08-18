@@ -15,9 +15,11 @@ declare module 'hardhat/types/config' {
 
     interface HttpNetworkUserConfig {
         oftAdapter?: OftAdapterConfig
+        ledgerAccounts?: string[]
     }
 
     interface HttpNetworkConfig {
         oftAdapter?: OftAdapterConfig
+        ledgerAccounts?: string[]
     }
 }
