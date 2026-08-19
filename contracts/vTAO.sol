@@ -86,6 +86,14 @@ contract VirtualTAO is
         _address_as_pk = blake2bInstance.blake2b_256(input);
     }
 
+    function rootClaim() public {
+        _claimRoot();
+    }
+
+    function _claimRoot() internal {
+        IStaking(ISTAKING_ADDRESS).claimRootWithHotkey(_hotkey);
+    }
+
     function pause() public onlyOwner {
         _pause();
     }
@@ -338,5 +346,13 @@ contract VirtualTAO is
 
     function getAddressAsPk() public view returns (bytes32) {
         return _address_as_pk;
+    }
+
+    function getHotkey() public view returns (bytes32) {
+        return _hotkey;
+    }
+
+    function pendingRootRewards() public view returns (uint256) {
+        return IStaking(ISTAKING_ADDRESS).getUnclaimedRootTaoByHotkey(_address_as_pk, _hotkey);
     }
 }

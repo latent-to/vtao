@@ -33,8 +33,6 @@ contract TestStakeUnstake is Test {
         bytes32 hotkey = 0x20b0f8ac1d5416d32f5a552f98b570f06e8392ccb803029e04f63fbe0553c954;
         bytes32 coldkey = vTAO.getAddressAsPk();
         uint256 netuid = 0;
-        uint256 currentIssuance = vTAO.totalSupply();
-        uint256 currentStakeRaoDecimals = vTAO.getCurrentStake(0);
 
         uint256 toStake = 1 * 1e9; // 1 TAO in RAO decimals
         uint256 toStakeEvm = toStake * 1e9;

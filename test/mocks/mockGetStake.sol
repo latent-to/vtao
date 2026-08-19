@@ -10,10 +10,15 @@ import {Vm} from "forge-std/Vm.sol";
 contract GetStakeMock is IStaking {
     Vm public constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
+    uint256 public constant UNCLAIMED_ROOT_TAO_THRESHOLD = 500_000e9; // Mock 1 TAO threshold for claiming root
+
     bytes private constant evm_prefix = hex"65766d3a";
     
     mapping(bytes32 => mapping(bytes32 => mapping(uint16 => uint256))) public stakeMapping;
-    
+
+    // Coldkey -> Netuid -> Hotkey -> Unclaimed Root TAO
+    mapping(bytes32 => mapping(uint16 => mapping(bytes32 => uint256))) public unclaimedRootTaoByHotkeyAndNetuidAndColdkeyMapping;
+
     // mocks
     function getStake(bytes32 hotkey, bytes32 coldkey, uint256 netuid) external view returns (uint256) {
         uint16 netuid16 = uint16(netuid);
@@ -276,5 +281,45 @@ contract GetStakeMock is IStaking {
         uint256 netuid
     ) external override {
         // do nothing
+    }
+
+    // Testing function to set the unclaimed root TAO by hotkey in the mapping
+    function _setUnclaimedRootTaoByHotkeyAndNetuidAndColdkey(
+        bytes32 coldkey,
+        bytes32 hotkey,
+        uint256 amount,
+        uint16 netuid
+    ) public {
+        // Set map directly
+        unclaimedRootTaoByHotkeyAndNetuidAndColdkeyMapping[hotkey][netuid][coldkey] = amount;
+    }
+
+    function claimRootWithHotkey(
+        bytes32 hotkey
+    ) external override {
+        address coldkey = msg.sender;
+        bytes32 coldkeyBytes = _getAddressAsPk(coldkey);
+        // If above threshold, claim
+        // loop over all netuids for the coldkey of the caller and the hotkey provided
+        for (uint16 netuid = 0; netuid < 256; netuid++) {
+            uint256 unclaimedRootTao = unclaimedRootTaoByHotkeyAndNetuidAndColdkeyMapping[hotkey][netuid][coldkeyBytes];
+            if (unclaimedRootTao > UNCLAIMED_ROOT_TAO_THRESHOLD) {
+                // increase stake on root
+                stakeMapping[hotkey][coldkeyBytes][0] += unclaimedRootTao;
+                unclaimedRootTaoByHotkeyAndNetuidAndColdkeyMapping[hotkey][netuid][coldkeyBytes] = 0;
+            }
+        }
+    }
+
+    function getUnclaimedRootTaoByHotkey(
+        bytes32 coldkey,
+        bytes32 hotkey
+    ) external view override returns (uint256) {
+        // loop over all netuids for the coldkey of the caller and the hotkey provided
+        uint256 totalUnclaimedRootTao = 0;
+        for (uint16 netuid = 0; netuid < 256; netuid++) {
+            totalUnclaimedRootTao += unclaimedRootTaoByHotkeyAndNetuidAndColdkeyMapping[coldkey][netuid][hotkey];
+        }
+        return totalUnclaimedRootTao;
     }
 }

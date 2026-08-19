@@ -250,4 +250,18 @@ interface IStaking {
         bool allow_partial,
         uint256 netuid
     ) external;
+
+    /**
+     * @dev Claims the accumulated root rewards for the specified hotkey on all subnets.
+     *
+     * @param hotkey The hotkey public key (32 bytes).
+     */
+    function claimRootWithHotkey(
+        bytes32 hotkey
+    ) external;
+
+    function getUnclaimedRootTaoByHotkey(
+        bytes32 coldkey,
+        bytes32 hotkey
+    ) external view returns (uint256);
 }
